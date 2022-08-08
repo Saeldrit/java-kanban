@@ -1,6 +1,8 @@
-public class Main {
+import service.manager.Manager;
+import service.manager.ManagerImplements;
 
+public class Main {
     public static void main(String[] args) {
-        System.out.println("Поехали!");
+        Manager manager = new ManagerImplements();
     }
 }
