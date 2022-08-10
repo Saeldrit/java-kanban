@@ -6,18 +6,19 @@ import java.util.Objects;
 
 public class Subtask extends Task {
 
-    private Epic epic;
+    private Integer epicId;
 
-    public Subtask(String title, String description) {
-        super(title, description);
+    public Subtask(String title, String description, int epicId) {
+        super(title, description, Status.NEW);
+        this.epicId = epicId;
     }
 
-    public Epic getEpic() {
-        return epic;
+    public Integer getEpicId() {
+        return epicId;
     }
 
-    public void setEpic(Epic epic) {
-        this.epic = epic;
+    public void setEpicId(int epicId) {
+        this.epicId = epicId;
     }
 
     @Override
@@ -56,12 +57,12 @@ public class Subtask extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Subtask subtask = (Subtask) o;
-        return Objects.equals(epic, subtask.epic);
+        return Objects.equals(epicId, subtask.epicId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), epic);
+        return Objects.hash(super.hashCode(), epicId);
     }
 
     @Override

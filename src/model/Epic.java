@@ -2,25 +2,27 @@ package model;
 
 import model.status.Status;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Epic extends Task {
 
-    private final Map<Integer, Subtask> subtaskMap;
+    private List<Subtask> subtaskIdList;
 
-    public Epic(String title, String description) {
-        super(title, description);
-        this.subtaskMap = new LinkedHashMap<>();
+    public Epic(String title, String description, Status status) {
+        super(title, description, status);
+        subtaskIdList = new ArrayList<>();
     }
 
-    public Map<Integer, Subtask> getSubtaskMap() {
-        return subtaskMap;
+    public List<Subtask> getSubtask() {
+        return subtaskIdList;
     }
 
-    public void setSubtaskMap(Subtask subtask) {
-        this.subtaskMap.put(subtask.getId(), subtask);
+    public void addSubtask(Subtask subtask) {
+        subtaskIdList.add(subtask);
+    }
+
+    public void setSubtaskIdList(List<Subtask> subtaskIdList) {
+        this.subtaskIdList = subtaskIdList;
     }
 
     @Override
@@ -29,28 +31,25 @@ public class Epic extends Task {
     }
 
     @Override
-    public void setStatus(Status status) {
-        super.setStatus(status);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
-        return Objects.equals(subtaskMap, epic.subtaskMap);
+        return Objects.equals(subtaskIdList, epic.subtaskIdList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subtaskMap);
+        return Objects.hash(super.hashCode(), subtaskIdList);
     }
 
     @Override
     public String toString() {
         return "Epic{" +
-                "subtaskMap=" + subtaskMap +
-                '}';
+                "subtaskIdList=" + subtaskIdList
+                + "title='" + super.getTitle() + '\''
+                + ", status=" + super.getStatus()
+                + ", id=" + super.getId() + '}';
     }
 }

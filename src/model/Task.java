@@ -1,21 +1,23 @@
 package model;
 
-import model.identifier.Identifier;
 import model.status.Status;
 
 import java.util.Objects;
 
 public class Task {
-    private final Integer id;
+    private Integer id;
     private String title;
     private String description;
     private Status status;
 
-    public Task(String title, String description) {
-        this.id = Identifier.getNextId();
+    public Task(String title, String description, Status status) {
         this.title = title;
         this.description = description;
-        this.status = Status.NEW;
+        this.status = status;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -51,8 +53,10 @@ public class Task {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
-        return Objects.equals(title, task.title) && Objects.equals(description, task.description)
-                && status == task.status && Objects.equals(id, task.id);
+        return Objects.equals(title, task.title)
+                && Objects.equals(description, task.description)
+                && status == task.status
+                && Objects.equals(id, task.id);
     }
 
     @Override
