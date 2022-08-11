@@ -6,23 +6,23 @@ import java.util.*;
 
 public class Epic extends Task {
 
-    private List<Subtask> subtaskIdList;
+    private List<Subtask> subtaskList;
 
     public Epic(String title, String description, Status status) {
         super(title, description, status);
-        subtaskIdList = new ArrayList<>();
+        subtaskList = new ArrayList<>();
     }
 
     public List<Subtask> getSubtask() {
-        return subtaskIdList;
+        return subtaskList;
     }
 
     public void addSubtask(Subtask subtask) {
-        subtaskIdList.add(subtask);
+        subtaskList.add(subtask);
     }
 
-    public void setSubtaskIdList(List<Subtask> subtaskIdList) {
-        this.subtaskIdList = subtaskIdList;
+    public void setSubtaskList(List<Subtask> subtaskList) {
+        this.subtaskList = subtaskList;
     }
 
     @Override
@@ -36,18 +36,18 @@ public class Epic extends Task {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Epic epic = (Epic) o;
-        return Objects.equals(subtaskIdList, epic.subtaskIdList);
+        return Objects.equals(subtaskList, epic.subtaskList);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), subtaskIdList);
+        return Objects.hash(super.hashCode(), subtaskList);
     }
 
     @Override
     public String toString() {
         return "Epic{" +
-                "subtaskIdList=" + subtaskIdList
+                "subtaskIdList=" + subtaskList
                 + "title='" + super.getTitle() + '\''
                 + ", status=" + super.getStatus()
                 + ", id=" + super.getId() + '}';

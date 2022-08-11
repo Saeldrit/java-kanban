@@ -25,12 +25,12 @@ public class Test {
 
         manager.getEpics().forEach(System.out::println);
 
-        testForFirstEpic(epic, subtask, subtask1);
+        printTestForFirstEpic(epic, subtask, subtask1);
 
         printCheckRemoveSubtask(epic1, subtask2);
     }
 
-    private void testForFirstEpic(Epic epic, Subtask...subtask) {
+    private void printTestForFirstEpic(Epic epic, Subtask... subtask) {
         subtask[0].setStatus(Status.DONE);
         subtask[1].setStatus(Status.DONE);
         manager.updateSubtask(subtask[0]);
@@ -53,7 +53,8 @@ public class Test {
     private void printCheckRemoveSubtask(Epic epic, Subtask subtask) {
         manager.removeSubtaskById(subtask.getId());
 
-        if (!manager.getEpics().contains(epic)) {
+        if (manager.getEpics().contains(epic) &&
+                !manager.getSubtasks().contains(subtask)) {
             System.out.println("Remove done SUCCESSFULLY");
         } else {
             System.out.println("FAILED");
