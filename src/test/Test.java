@@ -32,14 +32,14 @@ public class Test {
 
     private void printTestForFirstEpic(Epic epic, Subtask... subtask) {
         subtask[0].setStatus(Status.DONE);
-        subtask[1].setStatus(Status.DONE);
+        subtask[1].setStatus(Status.NEW);
         manager.updateSubtask(subtask[0]);
         manager.updateSubtask(subtask[1]);
-        printCheckStatus(epic, Status.DONE);
-
-        subtask[1].setStatus(Status.NEW);
-        manager.updateSubtask(subtask[1]);
         printCheckStatus(epic, Status.IN_PROGRESS);
+
+        subtask[1].setStatus(Status.DONE);
+        manager.updateSubtask(subtask[1]);
+        printCheckStatus(epic, Status.DONE);
     }
 
     private void printCheckStatus(Epic epic, Status status) {

@@ -60,7 +60,7 @@ public class ManagerImplements implements ManagerTask, ManagerEpic, ManagerSubta
                 taskMap.put(task.getId(), task);
             }
         } else {
-            throw new NullPointerException("Your Task is Null");
+            throw new IllegalArgumentException("Your Task is Null");
         }
     }
 
@@ -76,24 +76,12 @@ public class ManagerImplements implements ManagerTask, ManagerEpic, ManagerSubta
         }
     }
 
-    /**
-     * Я не стал дополнять логику работы метода с изменением id epic'a в subtask.
-     * Объясняю: в таком приложении необходимо будет свайпнуть подзадачу в нужный epic,
-     * а это выглядит нелогично и сложно для пользователя (сужу как пользователь),
-     * если только это не веб приложение в браузере. Мол, у нас выходит конструктор задач, а не ежедневник.
-     * Я не видел такого в других приложениях. Гораздо проще, если
-     * ты создал подзадачу не в нужном эпике, удалил её и создал новую в нужно эпике.
-     * Логика работы простая и наверняка, а это все выглядит сложно, в особенности с телефона,
-     * с точки зрения юзера.
-     * Не знаю, мне так кажется, а там конечно сделаю, если это так необходимо, пока вроде по заданию
-     * такого не требуется, если не ошибаюсь...я ведь так внимательно читаю тз)))
-     */
     @Override
     public void updateSubtask(Subtask subtask) {
         if (subtask != null) {
             Epic epic = epicMap.get(subtask.getEpicId());
 
-            updateEpic(epic);
+            updateEpicStatus(epic);
             subtaskMap.put(subtask.getId(), subtask);
         } else {
             throw new IllegalArgumentException("Your Subtask is Null");
@@ -148,7 +136,7 @@ public class ManagerImplements implements ManagerTask, ManagerEpic, ManagerSubta
     public void removeSubtasks() {
         subtaskMap.clear();
         for (var key : epicMap.keySet()) {
-            epicMap.get(key).setSubtaskList(null);
+            epicMap.get(key).setSubtaskList(new ArrayList<>());
         }
     }
 
@@ -178,7 +166,7 @@ public class ManagerImplements implements ManagerTask, ManagerEpic, ManagerSubta
 
             if (subtasks.size() == 0) {
                 subtaskMap.remove(id);
-                epicMap.get(epic.getId()).setSubtaskList(null);
+                epicMap.get(epic.getId()).setSubtaskList(new ArrayList<>());
             } else {
                 epic.setSubtaskList(subtasks);
                 updateEpic(epic);
@@ -187,34 +175,35 @@ public class ManagerImplements implements ManagerTask, ManagerEpic, ManagerSubta
         }
     }
 
-    /**
-     * Я решил оставить список подзадач, чтобы вернуть список из объекта Epic
-     * путём вызова одного метода. Не знаю, конечно, насколько это верно,
-     * но разве так не проще, когда нам порой не нужно делать лишние итерации в поисках
-     * и копировании списков, поиска объектов, а сразу получить готовый и если нужно, то пройтись по нему.
-     * Смотрел вебинар наставника, он тоже делал с id, я решил остановиться на списках
-     * объектов, на том, что в моём понимании легче. Я думаю на данном этапе имею возможность
-     * ошибаться и использовать разные варианты, чтобы прийти в понимании к этому.
-     *
-     */
     @Override
     public List<Subtask> getSubtasksByEpic(Epic epic) {
         return epic.getSubtask();
     }
 
+    /**
+     * Пересмотри, пожалуйста, этот метод. Я не нашёл ошибки. Создал несколько сабтасков, менял
+     * их статусы, все выводило корректно. Если все NEW, а одна (даже последняя) DONE - результат будет IN_PROGRESS.
+     * Если последний сабтаск будет DONE, то метод увеличивает счётчик на 1, при следующей проверке
+     * в условии else if у нас будет isCheck && counter < subtasks.size() && counter > 0
+     * - что изменит статус на IN_PROGRESS. А, если нигде не было DONE и INT_PROGRESS, то статус
+     * останется NEW.
+     */
     private void updateEpicStatus(Epic epic) {
         List<Subtask> subtasks = epic.getSubtask();
         boolean isCheck = false;
         int counter = 0;
 
         for (var subtask : subtasks) {
-            if (subtask.getStatus().equals(Status.IN_PROGRESS)) {
-                epic.setStatus(Status.IN_PROGRESS);
-                return;
-            } else if (subtask.getStatus().equals(Status.DONE)) {
-                ++counter;
-            } else {
-                isCheck = subtask.getStatus().equals(Status.NEW);
+            switch (subtask.getStatus()) {
+                case IN_PROGRESS:
+                    epic.setStatus(Status.IN_PROGRESS);
+                    return;
+                case DONE:
+                    ++counter;
+                    break;
+                case NEW:
+                    isCheck = subtask.getStatus().equals(Status.NEW);
+                    break;
             }
         }
 
