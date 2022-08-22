@@ -2,7 +2,7 @@ package service.data_structure.structure_interface;
 
 import java.util.List;
 
-public interface SetAndStackManager {
+public interface StructureManager {
     void push(int j);
 
     int pop();

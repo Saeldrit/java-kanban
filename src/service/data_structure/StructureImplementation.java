@@ -1,16 +1,16 @@
 package service.data_structure;
 
-import service.data_structure.structure_interface.SetAndStackManager;
+import service.data_structure.structure_interface.StructureManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SetAndStackImplementation implements SetAndStackManager {
+public class StructureImplementation implements StructureManager {
     private int[] stackArray;
     private int top;
     private int count;
 
-    public SetAndStackImplementation(int limitSize) {
+    public StructureImplementation(int limitSize) {
         stackArray = new int[limitSize];
         top = -1;
         count = 0;

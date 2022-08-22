@@ -1,8 +1,8 @@
 package service;
 
 import model.Task;
-import service.data_structure.SetAndStackImplementation;
-import service.data_structure.structure_interface.SetAndStackManager;
+import service.data_structure.StructureImplementation;
+import service.data_structure.structure_interface.StructureManager;
 import service.manager_interface.HistoryManager;
 
 import java.util.ArrayList;
@@ -10,14 +10,14 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private SetAndStackManager taskIdSet;
+    private StructureManager taskIdSet;
     private final InMemoryTaskManager manager;
     private List<Task> tasks;
     private int limitSize;
 
     public InMemoryHistoryManager(InMemoryTaskManager manager) {
         limitSize = 10;
-        this.taskIdSet = new SetAndStackImplementation(limitSize);
+        this.taskIdSet = new StructureImplementation(limitSize);
         this.manager = manager;
     }
 
@@ -33,7 +33,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     public void setLimitSize(int limitSize) {
-        taskIdSet = new SetAndStackImplementation(limitSize);
+        taskIdSet = new StructureImplementation(limitSize);
         this.limitSize = limitSize;
     }
 
