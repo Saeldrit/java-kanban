@@ -3,10 +3,10 @@ package test;
 import model.Epic;
 import model.Subtask;
 import model.status.Status;
-import service.ManagerImplements;
+import service.InMemoryTaskManager;
 
 public class Test {
-    ManagerImplements manager = new ManagerImplements();
+    InMemoryTaskManager manager = new InMemoryTaskManager();
 
     public void startTest() {
         Epic epic = new Epic("Переезд", "Уехать в Питер до конца недели", Status.NEW);

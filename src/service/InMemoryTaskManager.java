@@ -4,24 +4,31 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.status.Status;
+import service.manager_interface.HistoryManager;
 import service.manager_interface.ManagerEpic;
 import service.manager_interface.ManagerSubtask;
 import service.manager_interface.ManagerTask;
 
 import java.util.*;
 
-public class ManagerImplements implements ManagerTask, ManagerEpic, ManagerSubtask {
+public class InMemoryTaskManager implements ManagerTask, ManagerEpic, ManagerSubtask {
 
     private final Map<Integer, Task> taskMap;
     private final Map<Integer, Epic> epicMap;
     private final Map<Integer, Subtask> subtaskMap;
+    private final HistoryManager historyManager;
 
     private int identifier;
 
-    public ManagerImplements() {
+    public InMemoryTaskManager() {
         this.taskMap = new LinkedHashMap<>();
         this.epicMap = new LinkedHashMap<>();
         this.subtaskMap = new LinkedHashMap<>();
+        this.historyManager = new InMemoryHistoryManager(this);
+    }
+
+    public HistoryManager getHistoryManager() {
+        return historyManager;
     }
 
     @Override
@@ -108,16 +115,19 @@ public class ManagerImplements implements ManagerTask, ManagerEpic, ManagerSubta
 
     @Override
     public Task getTaskById(int id) {
+        historyManager.add(id);
         return taskMap.get(id);
     }
 
     @Override
     public Epic getEpicById(int id) {
+        historyManager.add(id);
         return epicMap.get(id);
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
+        historyManager.add(id);
         return subtaskMap.get(id);
     }
 
@@ -180,14 +190,6 @@ public class ManagerImplements implements ManagerTask, ManagerEpic, ManagerSubta
         return epic.getSubtask();
     }
 
-    /**
-     * Пересмотри, пожалуйста, этот метод. Я не нашёл ошибки. Создал несколько сабтасков, менял
-     * их статусы, все выводило корректно. Если все NEW, а одна (даже последняя) DONE - результат будет IN_PROGRESS.
-     * Если последний сабтаск будет DONE, то метод увеличивает счётчик на 1, при следующей проверке
-     * в условии else if у нас будет isCheck && counter < subtasks.size() && counter > 0
-     * - что изменит статус на IN_PROGRESS. А, если нигде не было DONE и INT_PROGRESS, то статус
-     * останется NEW.
-     */
     private void updateEpicStatus(Epic epic) {
         List<Subtask> subtasks = epic.getSubtask();
         boolean isCheck = false;
