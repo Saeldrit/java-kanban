@@ -26,7 +26,7 @@ public class SetAndStackImplementation implements SetAndStackManager {
 
     @Override
     public int pop() {
-        if (!isEmpty()) {
+        if (isEmpty()) {
             count--;
             return stackArray[top--];
         }
@@ -35,7 +35,7 @@ public class SetAndStackImplementation implements SetAndStackManager {
 
     @Override
     public int peek() {
-        if (!isEmpty()) {
+        if (isEmpty()) {
             return stackArray[top];
         } else {
             return top;
@@ -52,7 +52,7 @@ public class SetAndStackImplementation implements SetAndStackManager {
 
     @Override
     public boolean isEmpty() {
-        return (top == -1);
+        return (top != -1);
     }
 
     @Override
