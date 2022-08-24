@@ -1,17 +1,16 @@
 package service;
 
+import factory.Managers;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.status.Status;
 import service.manager_interface.HistoryManager;
-import service.manager_interface.ManagerEpic;
-import service.manager_interface.ManagerSubtask;
-import service.manager_interface.ManagerTask;
+import service.manager_interface.task_manager.ManagerApp;
 
 import java.util.*;
 
-public class InMemoryTaskManager implements ManagerTask, ManagerEpic, ManagerSubtask {
+public class InMemoryTaskManager extends ManagerApp {
 
     private final Map<Integer, Task> taskMap;
     private final Map<Integer, Epic> epicMap;
@@ -24,11 +23,12 @@ public class InMemoryTaskManager implements ManagerTask, ManagerEpic, ManagerSub
         this.taskMap = new LinkedHashMap<>();
         this.epicMap = new LinkedHashMap<>();
         this.subtaskMap = new LinkedHashMap<>();
-        this.historyManager = new InMemoryHistoryManager(this);
+        this.historyManager = Managers.getHistoryManager();
     }
 
-    public HistoryManager getHistoryManager() {
-        return historyManager;
+    @Override
+    public List<Task> getTaskViewHistory() {
+        return historyManager.getHistory();
     }
 
     @Override
@@ -115,19 +115,19 @@ public class InMemoryTaskManager implements ManagerTask, ManagerEpic, ManagerSub
 
     @Override
     public Task getTaskById(int id) {
-        historyManager.add(id);
+        historyManager.add(taskMap.get(id));
         return taskMap.get(id);
     }
 
     @Override
     public Epic getEpicById(int id) {
-        historyManager.add(id);
+        historyManager.add(epicMap.get(id));
         return epicMap.get(id);
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
-        historyManager.add(id);
+        historyManager.add(subtaskMap.get(id));
         return subtaskMap.get(id);
     }
 

@@ -1,12 +1,13 @@
 package test;
 
+import factory.Managers;
 import model.Epic;
 import model.Subtask;
 import model.status.Status;
-import service.InMemoryTaskManager;
+import service.manager_interface.task_manager.ManagerApp;
 
 public class Test {
-    InMemoryTaskManager manager = new InMemoryTaskManager();
+    ManagerApp manager = Managers.getDefault();
 
     public void startTest() {
         Epic epic = new Epic("Переезд", "Уехать в Питер до конца недели", Status.NEW);

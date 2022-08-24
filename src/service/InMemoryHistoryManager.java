@@ -1,31 +1,18 @@
 package service;
 
 import model.Task;
-import service.data_structure.StructureImplementation;
-import service.data_structure.structure_interface.StructureManager;
 import service.manager_interface.HistoryManager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private StructureManager taskIdSet;
-    private final InMemoryTaskManager manager;
-    private List<Task> tasks;
+    private final Set<Task> tasks;
     private int limitSize;
 
-    public InMemoryHistoryManager(InMemoryTaskManager manager) {
+    public InMemoryHistoryManager() {
+        tasks = new LinkedHashSet<>();
         limitSize = 10;
-        this.taskIdSet = new StructureImplementation(limitSize);
-        this.manager = manager;
-    }
-
-    private void initialization() {
-        tasks = new ArrayList<>();
-        tasks.addAll(manager.getEpics());
-        tasks.addAll(manager.getTasks());
-        tasks.addAll(manager.getSubtasks());
     }
 
     public int getLimitSize() {
@@ -33,35 +20,37 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     public void setLimitSize(int limitSize) {
-        taskIdSet = new StructureImplementation(limitSize);
         this.limitSize = limitSize;
     }
 
+    /**
+     *
+     * Сначала делаю удаление, чтобы старый просмотр удалился, а новый добавился на свое место.
+     * Иначе выйдет так, что при вводе 1 - 2 - 3 - 1 - 3 история будет хранить = 1 - 2 - 3,
+     * когда правильный результат 2 - 1 - 3. Я изначально хотел LinkedHashSet использовать,
+     * но сначала не додумался об простом удалении и после добавлении, чтобы выстроить правильный порядок
+     * добавления, поэтому решил сам написать смесь стека и множества. Херня вышла, а может не совсем,
+     * но в итоге переделал вот таким решением.
+     */
     @Override
-    public void add(int taskId) {
-        taskIdSet.push(taskId);
+    public void add(Task task) {
+        tasks.remove(task);
+        tasks.add(task);
     }
 
     @Override
     public List<Task> getHistory() {
-        List<Integer> listId = taskIdSet.peek(limitSize);
-        initialization();
-
-        return lookForTask(tasks, listId);
+        if (tasks.size() < limitSize && tasks.size() > 0) {
+            return new ArrayList<>(tasks);
+        } else if (tasks.size() > limitSize) {
+            return getTasksByLimitSize();
+        }
+        return new ArrayList<>();
     }
 
-    private List<Task> lookForTask(List<? extends Task> tasks, List<Integer> listId) {
-        List<Task> newTasks = new ArrayList<>();
+    private List<Task> getTasksByLimitSize() {
+        int startIndex = tasks.size() - limitSize;
 
-        for (var id : listId) {
-            for (var task : tasks) {
-                if (task.getId().equals(id)) {
-                    newTasks.add(task);
-                    break;
-                }
-            }
-        }
-
-        return newTasks;
+        return new ArrayList<>(tasks).subList(startIndex, tasks.size());
     }
 }
