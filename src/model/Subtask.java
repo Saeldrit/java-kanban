@@ -69,8 +69,7 @@ public class Subtask extends Task {
     public String toString() {
         return "Subtask{" +
                 "title='" + super.getTitle() + '\''
-                + ", description='" + super.getDescription() + '\''
                 + ", status=" + super.getStatus()
-                + ", id=" + super.getId() + "}\n";
+                + ", id=" + super.getId() + "}";
     }
 }

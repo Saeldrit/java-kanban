@@ -3,15 +3,18 @@ package service;
 import model.Task;
 import service.manager_interface.HistoryManager;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-    private final Set<Task> tasks;
+    private final Map<Integer, Task> tasks;
     private int limitSize;
 
     public InMemoryHistoryManager() {
-        tasks = new LinkedHashSet<>();
+        tasks = new LinkedHashMap<>();
         limitSize = 10;
     }
 
@@ -26,17 +29,22 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void add(Task task) {
         if (tasks.size() < limitSize) {
-            tasks.remove(task);
+            tasks.remove(task.getId());
         } else {
-            if (!tasks.remove(task)) {
-                tasks.remove(tasks.iterator().next());
+            if (tasks.remove(task.getId()) == null) {
+                tasks.remove(tasks.keySet().iterator().next());
             }
         }
-        tasks.add(task);
+        tasks.put(task.getId(), task);
     }
 
     @Override
     public List<Task> getHistory() {
-        return new ArrayList<>(tasks);
+        return new ArrayList<>(tasks.values());
+    }
+
+    @Override
+    public void remove(int id) {
+        tasks.remove(id);
     }
 }

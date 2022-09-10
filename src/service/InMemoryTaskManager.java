@@ -152,6 +152,7 @@ public class InMemoryTaskManager extends ManagerApp {
 
     @Override
     public void removeTaskById(int id) {
+        historyManager.remove(id);
         taskMap.remove(id);
     }
 
@@ -161,7 +162,9 @@ public class InMemoryTaskManager extends ManagerApp {
             Epic epic = epicMap.get(id);
             List<Subtask> subtasks = epic.getSubtask();
             subtasks.forEach(sub -> subtaskMap.remove(sub.getId()));
+            subtasks.forEach(sub -> historyManager.remove(sub.getId()));
             epicMap.remove(id);
+            historyManager.remove(id);
         }
     }
 
@@ -176,11 +179,14 @@ public class InMemoryTaskManager extends ManagerApp {
 
             if (subtasks.size() == 0) {
                 subtaskMap.remove(id);
+                historyManager.remove(id);
+                historyManager.remove(epic.getId());
                 epicMap.get(epic.getId()).setSubtaskList(new ArrayList<>());
             } else {
                 epic.setSubtaskList(subtasks);
                 updateEpic(epic);
                 subtaskMap.remove(id);
+                historyManager.remove(id);
             }
         }
     }
