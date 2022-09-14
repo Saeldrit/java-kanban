@@ -133,18 +133,24 @@ public class InMemoryTaskManager extends ManagerApp {
 
     @Override
     public void removeTasks() {
+        taskMap.values().forEach(e -> historyManager.remove(e.getId()));
+
         taskMap.clear();
     }
 
     @Override
     public void removeEpics() {
+        epicMap.values().forEach(e -> historyManager.remove(e.getId()));
+        subtaskMap.values().forEach(e -> historyManager.remove(e.getId()));
         epicMap.clear();
         subtaskMap.clear();
     }
 
     @Override
     public void removeSubtasks() {
+        subtaskMap.values().forEach(e -> historyManager.remove(e.getId()));
         subtaskMap.clear();
+
         for (var key : epicMap.keySet()) {
             epicMap.get(key).setSubtaskList(new ArrayList<>());
         }

@@ -50,7 +50,7 @@ public class Epic extends Task {
         return "Epic{" +
                 "subtaskIdList=" + subtaskList
                 + "title='" + super.getTitle() + '\''
-                + ", status=" + super.getStatus()
-                + ", id=" + super.getId() + '}';
+                + ", E status=" + super.getStatus()
+                + ", E id=" + super.getId() + "}\n";
     }
 }
