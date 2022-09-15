@@ -1,44 +1,29 @@
-package service;
+package service.history_manager;
 
 import model.Task;
-import service.manager_interface.HistoryManager;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InMemoryHistoryManager implements HistoryManager {
+public class CustomLinkedList {
 
     private final Map<Integer, Node> nodeMap;
     private Node tail;
     private Node head;
 
-    public InMemoryHistoryManager() {
-        this.nodeMap = new LinkedHashMap<>();
+    public CustomLinkedList() {
+        this.nodeMap = new HashMap<>();
     }
 
-    @Override
-    public void add(Task task) {
+    public void addTask(Task task) {
         nodeMap.remove(task.getId());
         linkLast(task);
         nodeMap.put(task.getId(), tail);
     }
 
-    @Override
-    public List<Task> getHistory() {
-        List<Task> tasks = new ArrayList<>();
-        nodeMap.values().forEach(e -> tasks.add(e.task));
-
-        return tasks;
-    }
-
-    @Override
-    public void remove(int id) {
-        removeTask(id);
-    }
-
-    private void removeTask(int id) {
+    public void removeTask(int id) {
         Node oldTailPrev = nodeMap.get(id).previous;
 
         nodeMap.get(id).task = null;
@@ -54,7 +39,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         nodeMap.remove(id);
     }
 
-    private void linkLast(Task task) {
+    public void linkLast(Task task) {
         Node oldTail = tail;
         Node newNode = new Node(task, tail, null);
         tail = newNode;
@@ -64,6 +49,13 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             oldTail.next = newNode;
         }
+    }
+
+    public List<Task> getTasks() {
+        List<Task> tasks = new ArrayList<>();
+        nodeMap.values().forEach(node -> tasks.add(node.task));
+
+        return tasks;
     }
 
     private static class Node {

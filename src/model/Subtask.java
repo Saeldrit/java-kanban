@@ -70,6 +70,6 @@ public class Subtask extends Task {
         return "Subtask{" +
                 "title='" + super.getTitle() + '\''
                 + ", status=" + super.getStatus()
-                + ", id=" + super.getId() + "}";
+                + ", id=" + super.getId() + "}\n";
     }
 }
