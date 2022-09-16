@@ -3,7 +3,7 @@ package service.history_manager;
 import model.Task;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,10 +11,9 @@ public class CustomLinkedList {
 
     private final Map<Integer, Node> nodeMap;
     private Node tail;
-    private Node head;
 
     public CustomLinkedList() {
-        this.nodeMap = new HashMap<>();
+        this.nodeMap = new LinkedHashMap<>();
     }
 
     public void addTask(Task task) {
@@ -30,23 +29,19 @@ public class CustomLinkedList {
         nodeMap.get(id).previous = null;
         tail = oldTailPrev;
 
-        if (oldTailPrev == null) {
-            head = null;
-        } else {
+        if (oldTailPrev != null) {
             oldTailPrev.next = null;
         }
 
         nodeMap.remove(id);
     }
 
-    public void linkLast(Task task) {
+    private void linkLast(Task task) {
         Node oldTail = tail;
         Node newNode = new Node(task, tail, null);
         tail = newNode;
 
-        if (oldTail == null) {
-            head = newNode;
-        } else {
+        if (oldTail != null) {
             oldTail.next = newNode;
         }
     }
