@@ -18,17 +18,16 @@ public class CustomLinkedList {
     }
 
     public void addTask(Task task) {
-        if (nodeMap.containsKey(task.getId())) {
-            removeNode(task.getId());
-        }
-
+        removeTask(task.getId());
         linkLast(task);
         nodeMap.put(task.getId(), tail);
     }
 
-    public void remove(int id) {
-        removeNode(id);
-        nodeMap.remove(id);
+    public void removeTask(int id) {
+        if (nodeMap.containsKey(id)) {
+            removeNode(id);
+            nodeMap.remove(id);
+        }
     }
 
     private void removeNode(int id) {
