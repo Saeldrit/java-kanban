@@ -3,7 +3,7 @@ package service.history_manager;
 import model.Task;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,29 +11,44 @@ public class CustomLinkedList {
 
     private final Map<Integer, Node> nodeMap;
     private Node tail;
+    private Node head;
 
     public CustomLinkedList() {
-        this.nodeMap = new LinkedHashMap<>();
+        this.nodeMap = new HashMap<>();
     }
 
     public void addTask(Task task) {
-        nodeMap.remove(task.getId());
+        if (nodeMap.containsKey(task.getId())) {
+            removeNode(task.getId());
+        }
+
         linkLast(task);
         nodeMap.put(task.getId(), tail);
     }
 
-    public void removeTask(int id) {
-        Node oldTailPrev = nodeMap.get(id).previous;
+    public void remove(int id) {
+        removeNode(id);
+        nodeMap.remove(id);
+    }
 
-        nodeMap.get(id).task = null;
-        nodeMap.get(id).previous = null;
-        tail = oldTailPrev;
+    private void removeNode(int id) {
+        Node node = nodeMap.get(id);
+        Node previous = node.previous;
+        Node next = node.next;
 
-        if (oldTailPrev != null) {
-            oldTailPrev.next = null;
+        if (previous == null) {
+            head = next;
+        } else {
+            previous.next = next;
+            node.previous = null;
         }
 
-        nodeMap.remove(id);
+        if (next == null) {
+            tail = previous;
+        } else {
+            next.previous = previous;
+            node.next = null;
+        }
     }
 
     private void linkLast(Task task) {
@@ -41,14 +56,21 @@ public class CustomLinkedList {
         Node newNode = new Node(task, tail, null);
         tail = newNode;
 
-        if (oldTail != null) {
+        if (oldTail == null) {
+            head = newNode;
+        } else {
             oldTail.next = newNode;
         }
     }
 
     public List<Task> getTasks() {
         List<Task> tasks = new ArrayList<>();
-        nodeMap.values().forEach(node -> tasks.add(node.task));
+        Node node = head;
+
+        while (node != null) {
+            tasks.add(node.task);
+            node = node.next;
+        }
 
         return tasks;
     }
