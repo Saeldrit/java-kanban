@@ -1,12 +1,17 @@
 package model;
 
 import model.status.Status;
+import model.type.Type;
 
 import java.util.Objects;
 
 public class Subtask extends Task {
 
     private Integer epicId;
+
+    public Subtask() {
+
+    }
 
     public Subtask(String title, String description, int epicId) {
         super(title, description, Status.NEW);
@@ -67,9 +72,12 @@ public class Subtask extends Task {
 
     @Override
     public String toString() {
-        return "Subtask{" +
-                "title='" + super.getTitle() + '\''
-                + ", status=" + super.getStatus()
-                + ", id=" + super.getId() + "}\n";
+        return String.format("%d,%s,%s,%s,%s,%s",
+                getId(),
+                Type.SUBTASK,
+                getTitle(),
+                getStatus(),
+                getDescription(),
+                getEpicId());
     }
 }

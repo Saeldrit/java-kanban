@@ -75,7 +75,7 @@ public class CustomLinkedList {
     }
 
     private static class Node {
-        private Task task;
+        private final Task task;
         private Node previous;
         private Node next;
 

@@ -1,13 +1,19 @@
 package model;
 
 import model.status.Status;
+import model.type.Type;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 public class Epic extends Task {
 
     private List<Subtask> subtaskList;
+
+    public Epic() {
+
+    }
 
     public Epic(String title, String description, Status status) {
         super(title, description, status);
@@ -47,10 +53,11 @@ public class Epic extends Task {
 
     @Override
     public String toString() {
-        return "Epic{" +
-                "subtaskIdList=" + subtaskList
-                + "title='" + super.getTitle() + '\''
-                + ", E status=" + super.getStatus()
-                + ", E id=" + super.getId() + "}\n";
+        return String.format("%d,%s,%s,%s,%s",
+                getId(),
+                Type.EPIC,
+                getTitle(),
+                getStatus(),
+                getDescription());
     }
 }

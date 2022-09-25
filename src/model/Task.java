@@ -1,6 +1,7 @@
 package model;
 
 import model.status.Status;
+import model.type.Type;
 
 import java.util.Objects;
 
@@ -9,6 +10,10 @@ public class Task {
     private String title;
     private String description;
     private Status status;
+
+    public Task() {
+
+    }
 
     public Task(String title, String description, Status status) {
         this.title = title;
@@ -66,10 +71,11 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "title='" + title + '\''
-                + ", description='" + description + '\''
-                + ", status=" + status
-                + ", id=" + id + '}';
+        return String.format("%d,%s,%s,%s,%s",
+                getId(),
+                Type.TASK,
+                getTitle(),
+                getStatus(),
+                getDescription());
     }
 }
