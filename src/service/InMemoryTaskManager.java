@@ -26,8 +26,12 @@ public class InMemoryTaskManager extends ManagerApp {
         this.historyManager = Managers.getHistoryManager();
     }
 
+    public HistoryManager getHistoryManager() {
+        return historyManager;
+    }
+
     @Override
-    public List<Task> getTaskViewHistory() {
+    public List<Task> getTasksViewHistory() {
         return historyManager.getHistory();
     }
 
