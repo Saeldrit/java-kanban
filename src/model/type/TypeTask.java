@@ -1,13 +1,13 @@
 package model.type;
 
-public enum Type {
+public enum TypeTask {
     TASK("Task"),
     EPIC("Epic"),
     SUBTASK("Subtask");
 
     private final String title;
 
-    Type(String title) {
+    TypeTask(String title) {
         this.title = title;
     }
 

@@ -12,10 +12,10 @@ import java.util.*;
 
 public class InMemoryTaskManager extends ManagerApp {
 
-    private final Map<Integer, Task> taskMap;
-    private final Map<Integer, Epic> epicMap;
-    private final Map<Integer, Subtask> subtaskMap;
-    private final HistoryManager historyManager;
+    protected final Map<Integer, Task> taskMap;
+    protected final Map<Integer, Epic> epicMap;
+    protected final Map<Integer, Subtask> subtaskMap;
+    protected final HistoryManager historyManager;
 
     private int identifier;
 
@@ -26,9 +26,13 @@ public class InMemoryTaskManager extends ManagerApp {
         this.historyManager = Managers.getHistoryManager();
     }
 
-    public HistoryManager getHistoryManager() {
-        return historyManager;
-    }
+/*    public String historyToString() {
+        List<Task> history = historyManager.getHistory();
+        StringBuilder historyLine = new StringBuilder();
+
+        history.forEach(task -> historyLine.append(task.getId()).append(","));
+        return historyLine.toString();
+    }*/
 
     @Override
     public List<Task> getTasksViewHistory() {

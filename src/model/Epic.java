@@ -1,7 +1,7 @@
 package model;
 
 import model.status.Status;
-import model.type.Type;
+import model.type.TypeTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ public class Epic extends Task {
     public String toString() {
         return String.format("%d,%s,%s,%s,%s",
                 getId(),
-                Type.EPIC,
+                TypeTask.EPIC,
                 getTitle(),
                 getStatus(),
                 getDescription());

@@ -1,7 +1,7 @@
 package model;
 
 import model.status.Status;
-import model.type.Type;
+import model.type.TypeTask;
 
 import java.util.Objects;
 
@@ -74,7 +74,7 @@ public class Subtask extends Task {
     public String toString() {
         return String.format("%d,%s,%s,%s,%s,%s",
                 getId(),
-                Type.SUBTASK,
+                TypeTask.SUBTASK,
                 getTitle(),
                 getStatus(),
                 getDescription(),

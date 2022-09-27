@@ -1,16 +1,17 @@
 package repository;
 
-import repository.composer.Reader;
-import repository.composer.Writer;
+import repository.composer.AbstractHandlerOfInformation;
+import throwable.exceptions.ManagerSaveException;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HandlerOfInformationInFile implements Reader, Writer {
+public class HandlerOfInformationInFile extends AbstractHandlerOfInformation {
 
     @Override
     public List<String> readContentFromFile(String path) {
@@ -19,9 +20,11 @@ public class HandlerOfInformationInFile implements Reader, Writer {
         try {
             if (Files.exists(Paths.get(path))) {
                 contentOfFile = Files.readAllLines(Paths.get(path));
+            } else {
+                Files.createFile(Paths.get(path));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ManagerSaveException("Not Found Path to File");
         }
 
         return contentOfFile;
@@ -29,12 +32,13 @@ public class HandlerOfInformationInFile implements Reader, Writer {
 
     @Override
     public void writeContentToFile(String path, List<String> content) {
-        try {
-            Files.write(Paths.get(path), content,
-                    StandardOpenOption.APPEND,
-                    StandardOpenOption.CREATE);
+        try (BufferedWriter buffer = new BufferedWriter(new FileWriter(path))) {
+            for (var line : content) {
+                buffer.write(line);
+                buffer.write("\n");
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ManagerSaveException("Not Found Path to File");
         }
     }
 }
