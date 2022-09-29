@@ -26,81 +26,96 @@ public class InMemoryTaskManager extends ManagerApp {
         this.historyManager = Managers.getHistoryManager();
     }
 
-/*    public String historyToString() {
-        List<Task> history = historyManager.getHistory();
-        StringBuilder historyLine = new StringBuilder();
+    protected void setIdentifier(int max) {
+        this.identifier = max;
+    }
 
-        history.forEach(task -> historyLine.append(task.getId()).append(","));
-        return historyLine.toString();
-    }*/
-
-    @Override
-    public List<Task> getTasksViewHistory() {
-        return historyManager.getHistory();
+    protected int getIdentifier() {
+        return identifier;
     }
 
     @Override
-    public void addNewTask(Task task) {
-        task.setId(++identifier);
-        taskMap.put(task.getId(), task);
-    }
-
-    @Override
-    public void addNewEpic(Epic epic) {
-        epic.setId(++identifier);
-        epicMap.put(epic.getId(), epic);
-    }
-
-    @Override
-    public void addNewSubtask(Subtask subtask) {
-        int epicId = subtask.getEpicId();
-        int subtaskId = ++identifier;
-        Epic epic = epicMap.get(epicId);
-
-        if (epic == null) {
-            throw new IllegalArgumentException("Add Epic for subtask");
+    public int addNewTask(Task task) {
+        if (!taskMap.containsKey(task.getId())) {
+            task.setId(++identifier);
+            taskMap.put(task.getId(), task);
         }
-
-        subtask.setId(subtaskId);
-        subtaskMap.put(subtaskId, subtask);
-
-        epic.addSubtask(subtask);
-        updateEpicStatus(epic);
+        return task.getId();
     }
 
     @Override
-    public void updateTask(Task task) {
+    public int addNewEpic(Epic epic) {
+        if (!epicMap.containsKey(epic.getId())) {
+            epic.setId(++identifier);
+            epicMap.put(epic.getId(), epic);
+        }
+        return epic.getId();
+    }
+
+    @Override
+    public int addNewSubtask(Subtask subtask) {
+        int epicId = subtask.getEpicId();
+
+        if (!subtaskMap.containsKey(subtask.getId())) {
+            int subtaskId = ++identifier;
+            Epic epic = epicMap.get(epicId);
+
+            if (epic == null) {
+                throw new IllegalArgumentException("Add Epic for subtask");
+            }
+
+            subtask.setId(subtaskId);
+            subtaskMap.put(subtaskId, subtask);
+
+            epic.addSubtask(subtask);
+            updateEpicStatus(epic);
+
+        }
+        return subtask.getId();
+    }
+
+    @Override
+    public int updateTask(Task task) {
+        int id = -1;
         if (task != null) {
             if (taskMap.containsKey(task.getId())) {
                 taskMap.put(task.getId(), task);
+                id = task.getId();
             }
         } else {
             throw new IllegalArgumentException("Your Task is Null");
         }
+        return id;
     }
 
     @Override
-    public void updateEpic(Epic epic) {
+    public int updateEpic(Epic epic) {
+        int id = -1;
         if (epic != null) {
             updateEpicStatus(epic);
             if (epicMap.containsKey(epic.getId())) {
                 epicMap.put(epic.getId(), epic);
+                id = epic.getId();
             }
         } else {
             throw new IllegalArgumentException("Your Epic is Null");
         }
+        return id;
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
+    public int updateSubtask(Subtask subtask) {
+        int id;
         if (subtask != null) {
             Epic epic = epicMap.get(subtask.getEpicId());
 
             updateEpicStatus(epic);
             subtaskMap.put(subtask.getId(), subtask);
+            id = subtask.getId();
         } else {
             throw new IllegalArgumentException("Your Subtask is Null");
         }
+        return id;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package model;
 
 import model.status.Status;
-import model.type.TypeTask;
 
 import java.util.Objects;
 
@@ -71,11 +70,10 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%d,%s,%s,%s,%s",
-                getId(),
-                TypeTask.TASK,
-                getTitle(),
-                getStatus(),
-                getDescription());
+        return "Task{"
+                + "id - " + getId()
+                + "; title - " + getTitle()
+                + "; desc - " + getDescription()
+                + "; status - " + getStatus();
     }
 }

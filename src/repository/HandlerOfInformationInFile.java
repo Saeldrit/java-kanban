@@ -1,6 +1,6 @@
 package repository;
 
-import repository.composer.AbstractHandlerOfInformation;
+import repository.composer.ReaderAndWriterHandler;
 import throwable.exceptions.ManagerSaveException;
 
 import java.io.BufferedWriter;
@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HandlerOfInformationInFile extends AbstractHandlerOfInformation {
+public class HandlerOfInformationInFile implements ReaderAndWriterHandler {
 
     @Override
     public List<String> readContentFromFile(String path) {

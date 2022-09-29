@@ -1,10 +1,10 @@
 package factory;
 
 import repository.HandlerOfInformationInFile;
-import repository.composer.AbstractHandlerOfInformation;
+import repository.composer.ReaderAndWriterHandler;
 import service.FileBackedTasksManager;
-import service.history_manager.InMemoryHistoryManager;
 import service.InMemoryTaskManager;
+import service.history_manager.InMemoryHistoryManager;
 import service.manager_interface.HistoryManager;
 import service.manager_interface.task_manager.ManagerApp;
 
@@ -21,7 +21,7 @@ public class Managers {
         return new InMemoryHistoryManager();
     }
 
-    public static AbstractHandlerOfInformation getHandler() {
+    public static ReaderAndWriterHandler getHandler() {
         return new HandlerOfInformationInFile();
     }
 }

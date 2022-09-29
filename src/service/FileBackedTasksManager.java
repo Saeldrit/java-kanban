@@ -6,77 +6,78 @@ import model.Subtask;
 import model.Task;
 import model.status.Status;
 import model.type.TypeTask;
-import repository.composer.AbstractHandlerOfInformation;
+import repository.composer.ReaderAndWriterHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private static final String FIRST_LINE = "id,type,name,status,description,epic";
     private final String filePath;
-    private final List<String> contentForWriteInTheFile;
-    private final AbstractHandlerOfInformation handler;
+    private final ReaderAndWriterHandler handler;
 
     public FileBackedTasksManager(String filePath) {
         this.filePath = filePath;
-        this.contentForWriteInTheFile = new ArrayList<>();
         this.handler = Managers.getHandler();
         createTasks(handler.readContentFromFile(filePath));
     }
 
     private void save() {
-        fillInContentToFile();
+        List<String> contentForWriteInTheFile = new ArrayList<>();
+        fillInContentToFile(contentForWriteInTheFile);
         handler.writeContentToFile(filePath, contentForWriteInTheFile);
     }
 
-    private void fillInContentToFile() {
+    private void fillInContentToFile(List<String> contentForWriteInTheFile) {
         contentForWriteInTheFile.clear();
         contentForWriteInTheFile.add(FIRST_LINE);
-        fillInTasks();
-        fillInEpics();
-        fillInSubtasks();
+        fillInTasks(contentForWriteInTheFile);
+        fillInEpics(contentForWriteInTheFile);
+        fillInSubtasks(contentForWriteInTheFile);
         contentForWriteInTheFile.add(historyToLine());
     }
 
-    private void fillInTasks() {
-        getTasks().forEach(task -> contentForWriteInTheFile.add(task.toString()));
+    private void fillInTasks(List<String> contentForWriteInTheFile) {
+        getTasks().forEach(task -> contentForWriteInTheFile.add(taskToString(task)));
     }
 
-    private void fillInEpics() {
-        getEpics().forEach(epic -> contentForWriteInTheFile.add(epic.toString()));
+    private void fillInEpics(List<String> contentForWriteInTheFile) {
+        getEpics().forEach(epic -> contentForWriteInTheFile.add(taskToString(epic)));
     }
 
-    private void fillInSubtasks() {
-        getSubtasks().forEach(sub -> contentForWriteInTheFile.add(sub.toString()));
+    private void fillInSubtasks(List<String> contentForWriteInTheFile) {
+        getSubtasks().forEach(sub -> contentForWriteInTheFile.add(taskToString(sub)));
     }
 
     private String historyToLine() {
-        StringBuilder history = new StringBuilder();
-
-        history.append("\n");
-        getTasksViewHistory().forEach(task -> history.append(task.getId()).append(","));
-        history.deleteCharAt(history.length() - 1);
-
-        return history.toString();
+        return "\n"
+                + historyManager.getHistory()
+                .stream()
+                .map(task -> String.valueOf(task.getId()))
+                .collect(Collectors.joining(","));
     }
 
     @Override
-    public void addNewTask(Task task) {
-        super.addNewTask(task);
+    public int addNewTask(Task task) {
+        int id = super.addNewTask(task);
         save();
+        return id;
     }
 
     @Override
-    public void addNewEpic(Epic epic) {
-        super.addNewEpic(epic);
+    public int addNewEpic(Epic epic) {
+        int id = super.addNewEpic(epic);
         save();
+        return id;
     }
 
     @Override
-    public void addNewSubtask(Subtask subtask) {
-        super.addNewSubtask(subtask);
+    public int addNewSubtask(Subtask subtask) {
+        int id = super.addNewSubtask(subtask);
         save();
+        return id;
     }
 
     @Override
@@ -101,21 +102,24 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
-        super.updateTask(task);
+    public int updateTask(Task task) {
+        int id = super.updateTask(task);
         save();
+        return id;
     }
 
     @Override
-    public void updateEpic(Epic epic) {
-        super.updateEpic(epic);
+    public int updateEpic(Epic epic) {
+        int id = super.updateEpic(epic);
         save();
+        return id;
     }
 
     @Override
-    public void updateSubtask(Subtask subtask) {
-        super.updateSubtask(subtask);
+    public int updateSubtask(Subtask subtask) {
+        int id = super.updateSubtask(subtask);
         save();
+        return id;
     }
 
     @Override
@@ -154,6 +158,15 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         save();
     }
 
+    public String taskToString(Task task) {
+        return String.format("%d,%s,%s,%s,%s",
+                task.getId(),
+                TypeTask.valueOf(task.getClass().getSimpleName().toUpperCase()),
+                task.getTitle(),
+                task.getStatus(),
+                task.getDescription());
+    }
+
     public void createTasks(List<String> content) {
         for (var line : content) {
             if (!line.isEmpty()) {
@@ -162,18 +175,23 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 String firstSymbol = split[0];
 
                 if (!firstSymbol.equals("id")) {
+                    int identifier = super.getIdentifier();
+
                     switch (TypeTask.valueOf(split[1]).ordinal()) {
                         case 0:
                             Task task = packTask(split);
                             super.taskMap.put(task.getId(), task);
+                            setIdentifierTask(identifier, task);
                             break;
                         case 1:
                             Epic epic = packEpic(split);
                             super.epicMap.put(epic.getId(), epic);
+                            setIdentifierTask(identifier, epic);
                             break;
                         case 2:
                             Subtask subtask = packSubtask(split);
                             super.subtaskMap.put(subtask.getId(), subtask);
+                            setIdentifierTask(identifier, subtask);
                             break;
                     }
                 }
@@ -181,6 +199,10 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 return;
             }
         }
+    }
+
+    private void setIdentifierTask(int identifier, Task task) {
+        super.setIdentifier(identifier < task.getId() ? task.getId() : identifier);
     }
 
     private Task packTask(String... split) {

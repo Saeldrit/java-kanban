@@ -5,9 +5,9 @@ import model.Task;
 import java.util.List;
 
 public interface ManagerTask {
-    void addNewTask(Task task);
+    int addNewTask(Task task);
 
-    void updateTask(Task task);
+    int updateTask(Task task);
 
     List<Task> getTasks();
 

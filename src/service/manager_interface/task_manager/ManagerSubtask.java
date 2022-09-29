@@ -5,9 +5,9 @@ import model.Subtask;
 import java.util.List;
 
 public interface ManagerSubtask {
-    void addNewSubtask(Subtask subtask);
+    int addNewSubtask(Subtask subtask);
 
-    void updateSubtask(Subtask subtask);
+    int updateSubtask(Subtask subtask);
 
     List<Subtask> getSubtasks();
 
