@@ -4,12 +4,12 @@ import repository.HandlerOfInformationInFile;
 import repository.composer.ReaderAndWriterHandler;
 import service.FileBackedTasksManager;
 import service.InMemoryTaskManager;
-import service.history_manager.InMemoryHistoryManager;
-import service.manager_interface.HistoryManager;
+import service.history_manager.implemets.InMemoryHistoryManager;
+import service.history_manager.HistoryManager;
 import service.manager_interface.task_manager.ManagerApp;
 
 public class Managers {
-    public static ManagerApp getDefault() {
+    public static ManagerApp getInMemoryTaskManager() {
         return new InMemoryTaskManager();
     }
 

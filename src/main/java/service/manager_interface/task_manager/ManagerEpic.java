@@ -18,5 +18,5 @@ public interface ManagerEpic {
 
     void removeEpicById(int id);
 
-    List<Subtask> getSubtasksByEpic(Epic epic);
+    List<Subtask> getSubtasksByEpic(int epicId);
 }

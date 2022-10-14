@@ -5,10 +5,11 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.status.Status;
-import service.manager_interface.HistoryManager;
+import service.history_manager.HistoryManager;
 import service.manager_interface.task_manager.ManagerApp;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class InMemoryTaskManager extends ManagerApp {
 
@@ -32,6 +33,10 @@ public class InMemoryTaskManager extends ManagerApp {
 
     protected int getIdentifier() {
         return identifier;
+    }
+
+    public List<Task> history() {
+        return historyManager.getHistory();
     }
 
     @Override
@@ -61,7 +66,7 @@ public class InMemoryTaskManager extends ManagerApp {
             Epic epic = epicMap.get(epicId);
 
             if (epic == null) {
-                throw new IllegalArgumentException("Add Epic for subtask");
+                throw new NullPointerException("Add Epic for subtask");
             }
 
             subtask.setId(subtaskId);
@@ -83,7 +88,7 @@ public class InMemoryTaskManager extends ManagerApp {
                 id = task.getId();
             }
         } else {
-            throw new IllegalArgumentException("Your Task is Null");
+            throw new NullPointerException("Your Task is Null");
         }
         return id;
     }
@@ -98,7 +103,7 @@ public class InMemoryTaskManager extends ManagerApp {
                 id = epic.getId();
             }
         } else {
-            throw new IllegalArgumentException("Your Epic is Null");
+            throw new NullPointerException("Your Epic is Null");
         }
         return id;
     }
@@ -113,7 +118,7 @@ public class InMemoryTaskManager extends ManagerApp {
             subtaskMap.put(subtask.getId(), subtask);
             id = subtask.getId();
         } else {
-            throw new IllegalArgumentException("Your Subtask is Null");
+            throw new NullPointerException("Your Subtask is Null");
         }
         return id;
     }
@@ -221,8 +226,12 @@ public class InMemoryTaskManager extends ManagerApp {
     }
 
     @Override
-    public List<Subtask> getSubtasksByEpic(Epic epic) {
-        return epic.getSubtask();
+    public List<Subtask> getSubtasksByEpic(int epicId) {
+        return subtaskMap
+                .values()
+                .stream()
+                .filter(sub -> sub.getEpicId().equals(epicId))
+                .collect(Collectors.toList());
     }
 
     private void updateEpicStatus(Epic epic) {
