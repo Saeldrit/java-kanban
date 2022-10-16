@@ -7,6 +7,7 @@ import model.status.Status;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,17 +17,32 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
     protected T taskManager;
 
     protected void initTask() {
-        taskManager.addNewTask(new Task("Test1", "Description", Status.NEW));
-        taskManager.addNewTask(new Task("Test2", "Description", Status.NEW));
+        taskManager.
+                addNewTask(
+                        new Task("Test1", "Description",
+                                Status.NEW, 15L, LocalDateTime.now()));
+        taskManager.
+                addNewTask(
+                        new Task("Test2", "Description",
+                                Status.NEW, 15L, LocalDateTime.now()));
     }
 
     protected void initSubtaskAndEpic() {
         Epic epic = new Epic("Epic1", "Description", Status.NEW);
         taskManager.addNewEpic(epic);
 
-        taskManager.addNewSubtask(new Subtask("Subtask1", "Description", epic.getId()));
-        taskManager.addNewSubtask(new Subtask("Subtask2", "Description", epic.getId()));
-        taskManager.addNewSubtask(new Subtask("Subtask3", "Description", epic.getId()));
+        taskManager.
+                addNewSubtask(
+                        new Subtask("Subtask1", "Description",
+                                epic.getId(), 15L, LocalDateTime.now()));
+        taskManager.
+                addNewSubtask(
+                        new Subtask("Subtask2", "Description",
+                                epic.getId(), 15L, LocalDateTime.now()));
+        taskManager.
+                addNewSubtask(
+                        new Subtask("Subtask3", "Description",
+                                epic.getId(), 15L, LocalDateTime.now()));
     }
 
     @DisplayName("Добавить новую задачу")
@@ -66,7 +82,8 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
     @Test
     public void shouldThrowNPEWhenCreatingSubtaskWithoutEpic() {
         int epicId = taskManager.getEpics().size() * 10;
-        Subtask newSubtask = new Subtask("Subtask1", "Description", epicId);
+        Subtask newSubtask = new Subtask("Subtask1", "Description",
+                epicId, 15L, LocalDateTime.now());
 
         assertThrows(NullPointerException.class, () -> taskManager.addNewSubtask(newSubtask));
     }
@@ -117,7 +134,10 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
         epic.setDescription("Update");
         epic.setId(taskManager.getEpics().size() * 10);
         epic.setTitle("Update Epic");
-        epic.setSubtaskList(List.of(new Subtask("Subtask1", "Description", epic.getId())));
+        epic.setSubtaskList(
+                List.of(
+                        new Subtask("Subtask1", "Description",
+                                epic.getId(), 15L, LocalDateTime.now())));
 
         int result = taskManager.updateEpic(epic);
 
@@ -301,7 +321,7 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
     public void shouldReturnSubtasks() {
         int subtasksCount = taskManager.getSubtasks().size();
         int epicId = taskManager.getEpics().get(0).getId();
-        taskManager.addNewSubtask(new Subtask("Test", "Test", epicId));
+        taskManager.addNewSubtask(new Subtask("Test", "Test", epicId, 15L, LocalDateTime.now()));
 
         assertNotEquals(subtasksCount, taskManager.getSubtasks().size());
     }

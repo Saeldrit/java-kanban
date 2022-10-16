@@ -1,8 +1,8 @@
 package model;
 
 import model.status.Status;
-import model.type.TypeTask;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Subtask extends Task {
@@ -13,8 +13,10 @@ public class Subtask extends Task {
 
     }
 
-    public Subtask(String title, String description, int epicId) {
-        super(title, description, Status.NEW);
+    public Subtask(String title, String description,
+                   int epicId,
+                   Long duration, LocalDateTime startTime) {
+        super(title, description, Status.NEW, duration, startTime);
         this.epicId = epicId;
     }
 
@@ -24,36 +26,6 @@ public class Subtask extends Task {
 
     public void setEpicId(int epicId) {
         this.epicId = epicId;
-    }
-
-    @Override
-    public Status getStatus() {
-        return super.getStatus();
-    }
-
-    @Override
-    public void setStatus(Status status) {
-        super.setStatus(status);
-    }
-
-    @Override
-    public String getTitle() {
-        return super.getTitle();
-    }
-
-    @Override
-    public void setTitle(String title) {
-        super.setTitle(title);
-    }
-
-    @Override
-    public String getDescription() {
-        return super.getDescription();
-    }
-
-    @Override
-    public void setDescription(String description) {
-        super.setDescription(description);
     }
 
     @Override

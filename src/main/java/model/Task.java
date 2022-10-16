@@ -2,6 +2,7 @@ package model;
 
 import model.status.Status;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -9,15 +10,25 @@ public class Task {
     private String title;
     private String description;
     private Status status;
+    private Long duration;
+    private LocalDateTime startTime;
 
     public Task() {
 
     }
 
-    public Task(String title, String description, Status status) {
+    public Task(String title, String description,
+                Status status,
+                Long duration, LocalDateTime startTime) {
         this.title = title;
         this.description = description;
         this.status = status;
+        this.duration = duration;
+        this.startTime = startTime;
+    }
+
+    public Integer getId() {
+        return id;
     }
 
     public void setId(Integer id) {
@@ -48,8 +59,24 @@ public class Task {
         this.status = status;
     }
 
-    public Integer getId() {
-        return id;
+    public Long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plusMinutes(duration);
     }
 
     @Override

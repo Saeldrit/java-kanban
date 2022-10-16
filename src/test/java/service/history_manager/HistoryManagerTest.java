@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import service.InMemoryTaskManager;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,12 +32,12 @@ public class HistoryManagerTest {
     }
 
     private void initialTask() {
-        Task task = new Task("task", "description", Status.NEW);
+        Task task = new Task("task", "description", Status.NEW, 15L, LocalDateTime.now());
         taskManager.addNewTask(task);
         Epic epic = new Epic("epic", "description", Status.NEW);
         taskManager.addNewEpic(epic);
-        Subtask subtask1 = new Subtask("subtask", "description", epic.getId());
-        Subtask subtask2 = new Subtask("subtask", "description", epic.getId());
+        Subtask subtask1 = new Subtask("subtask", "description", epic.getId(), 15L, LocalDateTime.now());
+        Subtask subtask2 = new Subtask("subtask", "description", epic.getId(), 15L, LocalDateTime.now());
         taskManager.addNewSubtask(subtask1);
         taskManager.addNewSubtask(subtask2);
     }

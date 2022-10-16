@@ -1,8 +1,8 @@
 package model;
 
 import model.status.Status;
-import model.type.TypeTask;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -10,13 +10,15 @@ import java.util.Objects;
 public class Epic extends Task {
 
     private List<Subtask> subtaskList;
+    private LocalDateTime endTime;
 
     public Epic() {
 
     }
 
-    public Epic(String title, String description, Status status) {
-        super(title, description, status);
+    public Epic(String title, String description,
+                Status status) {
+        super(title, description, status, 0L, LocalDateTime.now());
         subtaskList = new ArrayList<>();
     }
 
@@ -33,8 +35,12 @@ public class Epic extends Task {
     }
 
     @Override
-    public Status getStatus() {
-        return super.getStatus();
+    public LocalDateTime getEndTime() {
+        return this.endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
     }
 
     @Override
