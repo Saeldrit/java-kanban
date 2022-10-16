@@ -124,20 +124,17 @@ public class InMemoryTaskManager extends ManagerApp {
 
     @Override
     public List<Task> getTasks() {
-        Collection<Task> tasks = taskMap.values();
-        return new ArrayList<>(tasks);
+        return new ArrayList<>(taskMap.values());
     }
 
     @Override
     public List<Subtask> getSubtasks() {
-        Collection<Subtask> subtasks = subtaskMap.values();
-        return new ArrayList<>(subtasks);
+        return new ArrayList<>(subtaskMap.values());
     }
 
     @Override
     public List<Epic> getEpics() {
-        Collection<Epic> epics = epicMap.values();
-        return new ArrayList<>(epics);
+        return new ArrayList<>(epicMap.values());
     }
 
     @Override
@@ -233,6 +230,33 @@ public class InMemoryTaskManager extends ManagerApp {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        return taskMap.values()
+                .stream()
+                .sorted(Comparator.comparing(
+                        Task::getStartTime))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Epic> getPrioritizedEpics() {
+        return epicMap.values()
+                .stream()
+                .sorted(Comparator.comparing(
+                        Epic::getStartTime))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Subtask> getPrioritizedSubtasks() {
+        return subtaskMap.values()
+                .stream()
+                .sorted(Comparator.comparing(
+                        Subtask::getStartTime))
+                .collect(Collectors.toList());
+    }
+
     private void updateAllEpicProperties(Epic epic) {
         updateEpicStatus(epic);
         updateEpicDuration(epic);
@@ -277,13 +301,7 @@ public class InMemoryTaskManager extends ManagerApp {
     }
 
     private void updateEpicEndTime(Epic epic) {
-        epic.setEndTime(epic
-                .getSubtask()
-                .stream()
-                .max(Comparator.comparing(
-                        Subtask::getEndTime))
-                .orElseThrow()
-                .getEndTime());
+        epic.setEndTime(epic.getStartTime().plusMinutes(epic.getDuration()));
     }
 
     private void updateEpicStartTime(Epic epic) {

@@ -1,6 +1,7 @@
 package service.manager_interface.task_manager;
 
 import model.Subtask;
+import model.Task;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ public interface ManagerSubtask {
     void removeSubtasks();
 
     void removeSubtaskById(int id);
+
+    List<Subtask> getPrioritizedSubtasks();
 }

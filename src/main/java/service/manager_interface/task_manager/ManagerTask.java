@@ -16,4 +16,6 @@ public interface ManagerTask {
     void removeTasks();
 
     void removeTaskById(int id);
+
+    List<Task> getPrioritizedTasks();
 }
