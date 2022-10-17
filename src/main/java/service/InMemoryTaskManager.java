@@ -190,7 +190,7 @@ public class InMemoryTaskManager extends ManagerApp {
     public void removeEpicById(int id) {
         if (epicMap.containsKey(id)) {
             Epic epic = epicMap.get(id);
-            List<Subtask> subtasks = epic.getSubtask();
+            List<Subtask> subtasks = epic.getSubtaskList();
             subtasks.forEach(sub -> subtaskMap.remove(sub.getId()));
             subtasks.forEach(sub -> historyManager.remove(sub.getId()));
             epicMap.remove(id);
@@ -203,7 +203,7 @@ public class InMemoryTaskManager extends ManagerApp {
         if (subtaskMap.containsKey(id)) {
             Subtask subtask = subtaskMap.get(id);
             Epic epic = epicMap.get(subtask.getEpicId());
-            List<Subtask> subtasks = epic.getSubtask();
+            List<Subtask> subtasks = epic.getSubtaskList();
 
             subtasks.remove(subtask);
 
@@ -265,7 +265,7 @@ public class InMemoryTaskManager extends ManagerApp {
     }
 
     private void updateEpicStatus(Epic epic) {
-        List<Subtask> subtasks = epic.getSubtask();
+        List<Subtask> subtasks = epic.getSubtaskList();
         boolean isCheck = false;
         int counter = 0;
 
@@ -294,7 +294,7 @@ public class InMemoryTaskManager extends ManagerApp {
 
     private void updateEpicDuration(Epic epic) {
         epic.setDuration(epic
-                .getSubtask()
+                .getSubtaskList()
                 .stream()
                 .mapToLong(Subtask::getDuration)
                 .sum());
@@ -305,7 +305,7 @@ public class InMemoryTaskManager extends ManagerApp {
     }
 
     private void updateEpicStartTime(Epic epic) {
-        epic.setStartTime(epic.getSubtask()
+        epic.setStartTime(epic.getSubtaskList()
                 .stream()
                 .min(Comparator.comparing(
                         Subtask::getStartTime))

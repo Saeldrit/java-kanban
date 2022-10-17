@@ -10,14 +10,14 @@ import repository.composer.ReaderAndWriterHandler;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private static final String FIRST_LINE = "id,type,name,status,description,duration,startTime,epic";
+    private static final String FIRST_LINE =
+            "id,type,name,status,description,duration,startTime,epic";
     private final File file;
     private final ReaderAndWriterHandler handler;
 
@@ -255,16 +255,12 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 task.setDuration(Long.parseLong(array[i]));
                 break;
             case 6:
-                converterStringToLocalDateTime(task, array[i]);
+                task.setStartTime(LocalDateTime.parse(array[i]));
                 break;
             case 7:
                 setEpicIdForSubtask((Subtask) task, checkParseInt(array[i]));
                 break;
         }
-    }
-
-    private void converterStringToLocalDateTime(Task task, String dateTime) {
-        task.setStartTime(LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm")));
     }
 
     private void setEpicIdForSubtask(Subtask subtask, int epicId) {
