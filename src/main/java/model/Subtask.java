@@ -1,9 +1,6 @@
 package model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import model.status.Status;
 
 import java.time.LocalDateTime;
@@ -12,10 +9,12 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
 public class Subtask extends Task {
 
     private Integer epicId;
 
+    @Builder(builderMethodName = "subtaskBuilder")
     public Subtask(String title, String description,
                    int epicId,
                    Long duration, LocalDateTime startTime) {

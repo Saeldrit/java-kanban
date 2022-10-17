@@ -17,6 +17,4 @@ public interface ManagerSubtask {
     void removeSubtasks();
 
     void removeSubtaskById(int id);
-
-    List<Subtask> getPrioritizedSubtasks();
 }

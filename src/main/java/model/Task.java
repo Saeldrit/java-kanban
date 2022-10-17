@@ -1,9 +1,6 @@
 package model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import model.status.Status;
 
 import java.time.LocalDateTime;
@@ -13,6 +10,8 @@ import java.time.format.DateTimeFormatter;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(exclude = {"description", "duration"})
+@Builder
+@AllArgsConstructor
 public class Task {
     private Integer id;
     private String title;
@@ -42,7 +41,7 @@ public class Task {
     @Override
     public String toString() {
         return this.getClass().getSimpleName()
-                + "; id - " + getId()
+                + ": id - " + getId()
                 + "; title - " + getTitle()
                 + "; status - " + getStatus()
                 + "; startTime - " + converterDateTimeToString(getStartTime())

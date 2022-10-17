@@ -11,11 +11,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true, exclude = "subtaskList")
+@AllArgsConstructor
 public class Epic extends Task {
 
     private List<Subtask> subtaskList;
     private LocalDateTime endTime;
 
+    @Builder(builderMethodName = "epicBuilder")
     public Epic(String title, String description,
                 Status status) {
         super(title, description, status, 0L, LocalDateTime.now());

@@ -7,6 +7,7 @@ import model.status.Status;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -18,43 +19,68 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
     protected T taskManager;
 
     protected void initTask() {
-        taskManager.
-                addNewTask(
-                        new Task("Test1", "Description",
-                                Status.NEW, 15L, LocalDateTime.now().minusHours(1)));
-        taskManager.
-                addNewTask(
-                        new Task("Test2", "Description",
-                                Status.NEW, 25L, LocalDateTime.now()));
+        taskManager.addNewTask(Task.builder()
+                .id(1)
+                .title("Task1")
+                .description("description")
+                .status(Status.NEW)
+                .duration(15L)
+                .startTime(LocalDateTime.now().minusHours(1))
+                .build());
+
+        taskManager.addNewTask(Task.builder()
+                .id(2)
+                .title("Task2")
+                .description("description")
+                .status(Status.NEW)
+                .duration(15L)
+                .startTime(LocalDateTime.now().plusHours(1))
+                .build());
     }
 
     protected void initSubtaskAndEpic() {
-        Epic epic = new Epic("Epic1", "Description", Status.NEW);
+        Epic epic = Epic.epicBuilder()
+                .title("Epic1")
+                .description("Description")
+                .status(Status.NEW)
+                .build();
+
         taskManager.addNewEpic(epic);
 
-        taskManager.
-                addNewSubtask(
-                        new Subtask("Subtask1", "Description",
-                                epic.getId(), 20L, LocalDateTime.now().minusHours(1)));
-        taskManager.
-                addNewSubtask(
-                        new Subtask("Subtask2", "Description",
-                                epic.getId(), 18L, LocalDateTime.now().plusHours(2)));
-        taskManager.
-                addNewSubtask(
-                        new Subtask("Subtask3", "Description",
-                                epic.getId(), 22L, LocalDateTime.now().plusMinutes(15L)));
+        taskManager.addNewSubtask(
+                Subtask.subtaskBuilder()
+                        .title("Subtask1").description("Description")
+                        .epicId(epic.getId())
+                        .duration(10L)
+                        .startTime(LocalDateTime.now().plusMinutes(16))
+                        .build());
+
+        taskManager.addNewSubtask(
+                Subtask.subtaskBuilder()
+                        .title("Subtask2").description("Description")
+                        .epicId(epic.getId())
+                        .duration(15L)
+                        .startTime(LocalDateTime.now().plusHours(13))
+                        .build());
+
+        taskManager.addNewSubtask(
+                Subtask.subtaskBuilder()
+                        .title("Subtask3").description("Description")
+                        .epicId(epic.getId())
+                        .duration(25L)
+                        .startTime(LocalDateTime.now().plusMinutes(13))
+                        .build());
     }
 
     @DisplayName("Добавить новую задачу")
     @Test
     public void shouldMakeNewTask() {
         Task task = taskManager.getTasks().get(0);
-
         Task expectedTask = taskManager.getTaskById(task.getId());
 
         assertNotNull(expectedTask, "Задача не найдена.");
         assertEquals(task, expectedTask, "Задачи не совпадают.");
+        taskManager.getTasks().forEach(System.out::println);
     }
 
     @DisplayName("Добавить новый Эпик")
@@ -104,6 +130,8 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
         task.setDescription("Update");
         task.setTitle("Update Task");
         task.setStatus(Status.IN_PROGRESS);
+        task.setDuration(28L);
+        task.setStartTime(LocalDateTime.now().plusHours(12));
 
         int result = taskManager.updateTask(task);
 
@@ -303,7 +331,10 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
     @Test
     public void shouldReturnTasks() {
         int tasksCount = taskManager.getTasks().size();
-        taskManager.addNewTask(new Task());
+        taskManager.addNewTask(Task.builder()
+                .duration(15L)
+                .startTime(LocalDateTime.now().minusMinutes(12))
+                .build());
 
         assertNotEquals(tasksCount, taskManager.getTasks().size());
     }
@@ -482,10 +513,10 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
     @DisplayName("Вернуть список отсортированных подзадач по времени")
     @Test
     public void shouldReturnSortedSubtasksByTime() {
-        Subtask subtask1 = taskManager.getPrioritizedSubtasks().get(0);
-        Subtask subtask2 = taskManager.getPrioritizedSubtasks().get(1);
+        Task task1 = taskManager.getPrioritizedTasks().get(0);
+        Task task2 = taskManager.getPrioritizedTasks().get(1);
 
-        assertTrue(subtask1.getStartTime().isBefore(subtask2.getStartTime()));
+        assertTrue(task1.getStartTime().isBefore(task2.getStartTime()));
     }
 
     @DisplayName("Посчитать продолжительность выполнения эпика от суммы его подзадач")
@@ -519,5 +550,14 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
         Epic epic = taskManager.getEpics().get(0);
 
         assertEquals(epic.getEndTime(), epic.getStartTime().plusMinutes(epic.getDuration()));
+    }
+
+    @DisplayName("Поругаться, если уже есть задача с одинаковым временем старта")
+    @Test
+    public void shouldThrowDTEIfTimeEqual() {
+        Task task1 = Task.builder().duration(20L).startTime(LocalDateTime.now()).build();
+        taskManager.addNewTask(task1);
+
+        assertThrows(DateTimeException.class, () -> taskManager.addNewTask(task1));
     }
 }

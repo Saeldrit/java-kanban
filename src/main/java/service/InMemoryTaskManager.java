@@ -8,6 +8,7 @@ import model.status.Status;
 import service.history_manager.HistoryManager;
 import service.manager_interface.task_manager.ManagerApp;
 
+import java.time.DateTimeException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ public class InMemoryTaskManager extends ManagerApp {
     protected final Map<Integer, Task> taskMap;
     protected final Map<Integer, Epic> epicMap;
     protected final Map<Integer, Subtask> subtaskMap;
+    private final Set<Task> prioritizedTasks;
     protected final HistoryManager historyManager;
 
     private int identifier;
@@ -24,6 +26,11 @@ public class InMemoryTaskManager extends ManagerApp {
         this.taskMap = new LinkedHashMap<>();
         this.epicMap = new LinkedHashMap<>();
         this.subtaskMap = new LinkedHashMap<>();
+        this.prioritizedTasks = new TreeSet<>(Comparator
+                .comparing(Task::getStartTime,
+                        Comparator.nullsLast(
+                                Comparator.naturalOrder()))
+                .thenComparing(Task::getId));
         this.historyManager = Managers.getHistoryManager();
     }
 
@@ -41,9 +48,14 @@ public class InMemoryTaskManager extends ManagerApp {
 
     @Override
     public int addNewTask(Task task) {
-        if (!taskMap.containsKey(task.getId())) {
-            task.setId(++identifier);
-            taskMap.put(task.getId(), task);
+        if (validationIdenticalTasks(task)) {
+            if (!taskMap.containsKey(task.getId())) {
+                task.setId(++identifier);
+                taskMap.put(task.getId(), task);
+                prioritizedTasks.add(task);
+            }
+        } else {
+            throw new DateTimeException("Cannot create a task with the same time");
         }
         return task.getId();
     }
@@ -53,71 +65,79 @@ public class InMemoryTaskManager extends ManagerApp {
         if (!epicMap.containsKey(epic.getId())) {
             epic.setId(++identifier);
             epicMap.put(epic.getId(), epic);
+            prioritizedTasks.add(epic);
         }
         return epic.getId();
     }
 
     @Override
     public int addNewSubtask(Subtask subtask) {
-        int epicId = subtask.getEpicId();
+        if (validationIdenticalTasks(subtask)) {
+            int epicId = subtask.getEpicId();
 
-        if (!subtaskMap.containsKey(subtask.getId())) {
-            int subtaskId = ++identifier;
-            Epic epic = epicMap.get(epicId);
+            if (!subtaskMap.containsKey(subtask.getId())) {
+                int subtaskId = ++identifier;
+                Epic epic = epicMap.get(epicId);
 
-            if (epic == null) {
-                throw new NullPointerException("Add Epic for subtask");
+                if (epic == null) {
+                    throw new NullPointerException("Add Epic for subtask");
+                }
+
+                subtask.setId(subtaskId);
+                subtaskMap.put(subtaskId, subtask);
+
+                epic.addSubtask(subtask);
+                updateAllEpicProperties(epic);
+                prioritizedTasks.add(subtask);
             }
-
-            subtask.setId(subtaskId);
-            subtaskMap.put(subtaskId, subtask);
-
-            epic.addSubtask(subtask);
-            updateAllEpicProperties(epic);
+        } else {
+            throw new DateTimeException("Cannot create a subtask with the same time");
         }
         return subtask.getId();
     }
 
     @Override
     public int updateTask(Task task) {
-        int id = -1;
         if (task != null) {
             if (taskMap.containsKey(task.getId())) {
                 taskMap.put(task.getId(), task);
-                id = task.getId();
+                initTasksOtThrowDateTime(task);
+                return task.getId();
             }
         } else {
-            throw new NullPointerException("Your Task is Null");
+            throw new NullPointerException("Your task is null");
         }
-        return id;
+        return -1;
     }
 
     @Override
     public int updateEpic(Epic epic) {
-        int id = -1;
         if (epic != null) {
             updateAllEpicProperties(epic);
             if (epicMap.containsKey(epic.getId())) {
                 epicMap.put(epic.getId(), epic);
-                id = epic.getId();
+                prioritizedTasks.add(epic);
+                return epic.getId();
             }
         } else {
-            throw new NullPointerException("Your Epic is Null");
+            throw new NullPointerException("Your epic is null");
         }
-        return id;
+        return -1;
     }
 
     @Override
     public int updateSubtask(Subtask subtask) {
         int id;
+
         if (subtask != null) {
             Epic epic = epicMap.get(subtask.getEpicId());
-
             updateAllEpicProperties(epic);
             subtaskMap.put(subtask.getId(), subtask);
+
+            prioritizedTasks.add(subtask);
             id = subtask.getId();
         } else {
-            throw new NullPointerException("Your Subtask is Null");
+            throw new NullPointerException("Your subtask is null");
         }
         return id;
     }
@@ -232,29 +252,7 @@ public class InMemoryTaskManager extends ManagerApp {
 
     @Override
     public List<Task> getPrioritizedTasks() {
-        return taskMap.values()
-                .stream()
-                .sorted(Comparator.comparing(
-                        Task::getStartTime))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Epic> getPrioritizedEpics() {
-        return epicMap.values()
-                .stream()
-                .sorted(Comparator.comparing(
-                        Epic::getStartTime))
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Subtask> getPrioritizedSubtasks() {
-        return subtaskMap.values()
-                .stream()
-                .sorted(Comparator.comparing(
-                        Subtask::getStartTime))
-                .collect(Collectors.toList());
+        return new ArrayList<>(prioritizedTasks);
     }
 
     private void updateAllEpicProperties(Epic epic) {
@@ -311,5 +309,20 @@ public class InMemoryTaskManager extends ManagerApp {
                         Subtask::getStartTime))
                 .orElseThrow()
                 .getStartTime());
+    }
+
+    private void initTasksOtThrowDateTime(Task task) {
+        if (validationIdenticalTasks(task)) {
+            prioritizedTasks.add(task);
+        } else {
+            throw new DateTimeException("Cannot create a task with the same time");
+        }
+    }
+
+    private boolean validationIdenticalTasks(Task newTask) {
+        return prioritizedTasks
+                .stream()
+                .noneMatch(task -> task.getStartTime()
+                        .isEqual(newTask.getStartTime()));
     }
 }

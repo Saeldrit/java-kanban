@@ -6,6 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import service.manager_interface.task_manager.ManagerAppTest;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InMemoryTaskManagerTest extends ManagerAppTest<InMemoryTaskManager> {
@@ -21,7 +23,10 @@ class InMemoryTaskManagerTest extends ManagerAppTest<InMemoryTaskManager> {
     @Test
     public void shouldIncrementIdentifierAfterAddTask() {
         int initialValue = taskManager.getIdentifier();
-        taskManager.addNewTask(new Task());
+        taskManager.addNewTask(Task.builder()
+                .duration(15L)
+                .startTime(LocalDateTime.now().minusDays(1))
+                .build());
 
         assertTrue(initialValue < taskManager.getIdentifier());
     }
