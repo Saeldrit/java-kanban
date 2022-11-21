@@ -87,7 +87,6 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
     @Test
     public void shouldMakeNewEpic() {
         Epic epic = taskManager.getEpics().get(0);
-
         Epic expectedEpic = taskManager.getEpicById(epic.getId());
 
         assertNotNull(expectedEpic, "Задача не найдена.");
@@ -98,7 +97,6 @@ public abstract class ManagerAppTest<T extends ManagerApp> {
     @Test
     void shouldMakeNewSubtask() {
         Subtask subtask = taskManager.getSubtasks().get(0);
-
         Subtask expectedSubtask = taskManager.getSubtaskById(subtask.getId());
 
         assertNotNull(expectedSubtask, "Задача не найдена.");

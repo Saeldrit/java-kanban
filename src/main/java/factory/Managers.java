@@ -1,11 +1,12 @@
 package factory;
 
+import com.google.gson.Gson;
 import repository.HandlerOfInformationInFile;
 import repository.composer.ReaderAndWriterHandler;
 import service.FileBackedTasksManager;
 import service.InMemoryTaskManager;
-import service.history_manager.implemets.InMemoryHistoryManager;
 import service.history_manager.HistoryManager;
+import service.history_manager.implemets.InMemoryHistoryManager;
 import service.manager_interface.task_manager.ManagerApp;
 
 public class Managers {
@@ -23,5 +24,9 @@ public class Managers {
 
     public static ReaderAndWriterHandler getHandler() {
         return new HandlerOfInformationInFile();
+    }
+
+    public static Gson getGson() {
+        return new Gson();
     }
 }
