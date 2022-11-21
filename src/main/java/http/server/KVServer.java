@@ -3,6 +3,7 @@ package http.server;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,15 +28,41 @@ public class KVServer {
         server.createContext("/load", this::load);
     }
 
-    private void load(HttpExchange exchange) {
-        // TODO Добавьте получение значения по ключу
+    private void load(HttpExchange exchange) throws IOException {
+        if (!hasAuth(exchange)) {
+            System.out.println("Запрос не авторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+            exchange.sendResponseHeaders(403, 0);
+        }
+        if ("GET".equals(exchange.getRequestMethod())) {
+            String key = exchange.getRequestURI().getPath().substring("/load/".length());
+            if (key.isEmpty()) {
+                System.out.println("Key для получения пустой. key указывается в пути: /load/{key}");
+                exchange.sendResponseHeaders(400, 0);
+                return;
+            }
+            if (data.containsKey(key)) {
+                System.out.printf("Значение по ключу %s возвращено", key);
+                exchange.sendResponseHeaders(200, 0);
+            } else {
+                System.out.printf("Запрашиваемый ключ %s не найден", key);
+                exchange.sendResponseHeaders(404, 0);
+                return;
+            }
+
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(data.get(key).getBytes());
+            }
+        } else {
+            System.out.println("/load ждёт GET-запрос, а получил: " + exchange.getRequestMethod());
+            exchange.sendResponseHeaders(405, 0);
+        }
     }
 
     private void save(HttpExchange exchange) throws IOException {
         try {
             System.out.println("\n/save");
             if (!hasAuth(exchange)) {
-                System.out.println("Запрос неавторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
+                System.out.println("Запрос не авторизован, нужен параметр в query API_TOKEN со значением апи-ключа");
                 exchange.sendResponseHeaders(403, 0);
                 return;
             }
