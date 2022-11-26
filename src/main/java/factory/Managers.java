@@ -1,21 +1,20 @@
 package factory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import http.json_type_adapter.LocalDateTimeAdapter;
 import repository.HandlerOfInformationInFile;
 import repository.composer.ReaderAndWriterHandler;
-import service.FileBackedTasksManager;
-import service.InMemoryTaskManager;
+import service.HttpTaskManager;
 import service.history_manager.HistoryManager;
 import service.history_manager.implemets.InMemoryHistoryManager;
 import service.manager_interface.task_manager.ManagerApp;
 
-public class Managers {
-    public static ManagerApp getInMemoryTaskManager() {
-        return new InMemoryTaskManager();
-    }
+import java.io.IOException;
 
-    public static ManagerApp getFileBacked(String path) {
-        return new FileBackedTasksManager(path);
+public class Managers {
+    public static ManagerApp getDefault(String urlToServer) {
+        return new HttpTaskManager(urlToServer);
     }
 
     public static HistoryManager getHistoryManager() {
@@ -27,6 +26,9 @@ public class Managers {
     }
 
     public static Gson getGson() {
-        return new Gson();
+        return new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(LocalDateTimeAdapter.class, new LocalDateTimeAdapter())
+                .create();
     }
 }

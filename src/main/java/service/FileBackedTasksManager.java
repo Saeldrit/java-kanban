@@ -27,7 +27,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         createTasks(handler.readContentFromFile(filePath));
     }
 
-    private void save() {
+    protected void save() {
         List<String> contentForWriteInTheFile = new ArrayList<>();
         fillInContentToFile(contentForWriteInTheFile);
         handler.writeContentToFile(file.getPath(), contentForWriteInTheFile);
