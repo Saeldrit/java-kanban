@@ -1,11 +1,9 @@
 package service;
 
-import factory.Managers;
 import model.Epic;
 import model.Subtask;
 import model.Task;
 import model.status.Status;
-import service.history_manager.HistoryManager;
 import service.manager_interface.task_manager.ManagerApp;
 
 import java.time.DateTimeException;
@@ -18,7 +16,6 @@ public class InMemoryTaskManager extends ManagerApp {
     protected final Map<Integer, Epic> epicMap;
     protected final Map<Integer, Subtask> subtaskMap;
     private final Set<Task> prioritizedTasks;
-    protected final HistoryManager historyManager;
 
     private int identifier;
 
@@ -31,7 +28,6 @@ public class InMemoryTaskManager extends ManagerApp {
                         Comparator.nullsLast(
                                 Comparator.naturalOrder()))
                 .thenComparing(Task::getId));
-        this.historyManager = Managers.getHistoryManager();
     }
 
     protected void setIdentifier(int max) {
@@ -40,10 +36,6 @@ public class InMemoryTaskManager extends ManagerApp {
 
     protected int getIdentifier() {
         return identifier;
-    }
-
-    public List<Task> history() {
-        return historyManager.getHistory();
     }
 
     @Override
@@ -101,7 +93,7 @@ public class InMemoryTaskManager extends ManagerApp {
         if (task != null) {
             if (taskMap.containsKey(task.getId())) {
                 taskMap.put(task.getId(), task);
-                initTasksOtThrowDateTime(task);
+                prioritizedTasks.add(task);
                 return task.getId();
             }
         } else {
@@ -309,14 +301,6 @@ public class InMemoryTaskManager extends ManagerApp {
                         Subtask::getStartTime))
                 .orElseThrow()
                 .getStartTime());
-    }
-
-    private void initTasksOtThrowDateTime(Task task) {
-        if (validationIdenticalTasks(task)) {
-            prioritizedTasks.add(task);
-        } else {
-            throw new DateTimeException("Cannot create a task with the same time");
-        }
     }
 
     private boolean validationIdenticalTasks(Task newTask) {

@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 public class HttpTaskServer {
@@ -29,29 +30,34 @@ public class HttpTaskServer {
         this.gson = Managers.getGson();
     }
 
-    public void startServer() {
+    public void startHttpServer() {
         server.createContext("/tasks/task", this::methodAllocator);
         server.createContext("/tasks/subtask", this::methodAllocator);
         server.createContext("/tasks/epic", this::methodAllocator);
+        server.createContext("/tasks", this::methodAllocator);
         server.createContext("/tasks/history", this::methodAllocator);
         server.start();
     }
 
     /**
-     *
-     * Я думаю тут без объяснений, что запросы DELETE & PUT явно не доделаны)))
+     * Какая практика обработки исключений в данном случае будет лучше?
+     * Чтобы не прокидывать их выше.
      */
     private void methodAllocator(HttpExchange httpExchange) throws IOException {
         try {
-            String method = httpExchange.getRequestMethod();
-
-            switch (method) {
+            switch (httpExchange.getRequestMethod()) {
                 case "GET":
                     getTaskAllocator(httpExchange);
+                    break;
                 case "POST":
                     postAddTaskAllocator(httpExchange);
+                    break;
                 case "DELETE":
+                    deleteTaskAllocator(httpExchange);
+                    break;
                 case "PUT":
+                    putUpdateTaskAllocator(httpExchange);
+                    break;
                 default:
                     httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_METHOD, 0);
             }
@@ -60,10 +66,99 @@ public class HttpTaskServer {
         }
     }
 
-    /**
-     * Какая практика обработки исключений в данном случае будет лучше?
-     * Чтобы не прокидывать их выше.
-     */
+    private void getTaskAllocator(HttpExchange httpExchange) throws IOException {
+        try {
+            String path = httpExchange.getRequestURI().getPath();
+            String[] split = path.split("/");
+
+            if (split.length == 2) {
+                getAllTasks(split[1], httpExchange);
+            } else {
+                String query = split[2];
+
+                switch (query) {
+                    case "task":
+                        getTaskById(httpExchange);
+                        break;
+                    case "epic":
+                        getEpicById(httpExchange);
+                        break;
+                    case "subtask":
+                        getSubtaskById(httpExchange);
+                        break;
+                    case "history":
+                        getBrowsingHistory(httpExchange);
+                        break;
+                    default:
+                        httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+                }
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void getAllTasks(String query, HttpExchange httpExchange) throws IOException {
+        switch (query) {
+            case "tasks":
+                getTasks(httpExchange);
+                break;
+            case "epics":
+                getEpics(httpExchange);
+                break;
+            case "subtasks":
+                getSubtasks(httpExchange);
+                break;
+            default:
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+        }
+    }
+
+    private void getTasks(HttpExchange httpExchange) throws IOException {
+        try {
+            List<Task> epics = managerApp.getTasks();
+
+            httpExchange.sendResponseHeaders(200, 0);
+            try (OutputStream os = httpExchange.getResponseBody()) {
+                for (var task : epics) {
+                    os.write(gson.toJson(task).getBytes());
+                }
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void getEpics(HttpExchange httpExchange) throws IOException {
+        try {
+            List<Epic> tasks = managerApp.getEpics();
+
+            httpExchange.sendResponseHeaders(200, 0);
+            try (OutputStream os = httpExchange.getResponseBody()) {
+                for (var epic : tasks) {
+                    os.write(gson.toJson(epic).getBytes());
+                }
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void getSubtasks(HttpExchange httpExchange) throws IOException {
+        try {
+            List<Subtask> subtasks = managerApp.getSubtasks();
+
+            httpExchange.sendResponseHeaders(200, 0);
+            try (OutputStream os = httpExchange.getResponseBody()) {
+                for (var sub : subtasks) {
+                    os.write(gson.toJson(sub).getBytes());
+                }
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
     private void postAddTaskAllocator(HttpExchange httpExchange) throws IOException {
         try {
             String path = httpExchange.getRequestURI().getPath();
@@ -75,13 +170,98 @@ public class HttpTaskServer {
             switch (query) {
                 case "task":
                     addNewTask(inputBody, httpExchange);
+                    break;
                 case "epic":
                     addNewEpic(inputBody, httpExchange);
+                    break;
                 case "subtask":
                     addNewSubtask(inputBody, httpExchange);
+                    break;
                 default:
                     httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
             }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void putUpdateTaskAllocator(HttpExchange httpExchange) throws IOException {
+        try {
+            String path = httpExchange.getRequestURI().getPath();
+            String query = path.split("/")[2];
+
+            InputStream inputStream = httpExchange.getRequestBody();
+            String inputBody = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+            switch (query) {
+                case "task":
+                    updateTask(inputBody, httpExchange);
+                    break;
+                case "epic":
+                    updateEpic(inputBody, httpExchange);
+                    break;
+                case "subtask":
+                    updateSubtask(inputBody, httpExchange);
+                    break;
+                default:
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void deleteTaskAllocator(HttpExchange httpExchange) throws IOException {
+        try {
+            String path = httpExchange.getRequestURI().getPath();
+            String query = path.split("/")[2];
+
+            switch (query) {
+                case "task":
+                    removeTaskById(httpExchange);
+                    break;
+                case "epic":
+                    removeEpicById(httpExchange);
+                    break;
+                case "subtask":
+                    removeSubtaskById(httpExchange);
+                    break;
+                default:
+                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void removeTaskById(HttpExchange httpExchange) throws IOException {
+        try {
+            int id = parseId(httpExchange);
+            managerApp.removeTaskById(id);
+
+            httpExchange.sendResponseHeaders(200, 0);
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void removeEpicById(HttpExchange httpExchange) throws IOException {
+        try {
+            int id = parseId(httpExchange);
+            managerApp.removeEpicById(id);
+
+            httpExchange.sendResponseHeaders(200, 0);
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void removeSubtaskById(HttpExchange httpExchange) throws IOException {
+        try {
+            int id = parseId(httpExchange);
+            managerApp.removeSubtaskById(id);
+
+            httpExchange.sendResponseHeaders(200, 0);
         } finally {
             httpExchange.close();
         }
@@ -120,26 +300,6 @@ public class HttpTaskServer {
         }
     }
 
-    private void getTaskAllocator(HttpExchange httpExchange) throws IOException {
-        try {
-            String path = httpExchange.getRequestURI().getPath();
-            String query = path.split("/")[2];
-
-            switch (query) {
-                case "task":
-                    getTaskById(httpExchange);
-                case "epic":
-                    getEpicById(httpExchange);
-                case "subtask":
-                    getSubtaskById(httpExchange);
-                default:
-                    httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, 0);
-            }
-        } finally {
-            httpExchange.close();
-        }
-    }
-
     private void getTaskById(HttpExchange httpExchange) throws IOException {
         try {
             int id = parseId(httpExchange);
@@ -168,6 +328,52 @@ public class HttpTaskServer {
 
             Optional<Subtask> optional = Optional.ofNullable(managerApp.getSubtaskById(id));
             getTaskOrNotFound(optional, httpExchange);
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void getBrowsingHistory(HttpExchange httpExchange) throws IOException {
+        try {
+            String history = managerApp.historyToLine();
+
+            httpExchange.sendResponseHeaders(200, 0);
+            try (OutputStream os = httpExchange.getResponseBody()) {
+                os.write(history.getBytes());
+            }
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void updateTask(String inputBody, HttpExchange httpExchange) throws IOException {
+        try {
+            Task task = gson.fromJson(inputBody, Task.class);
+            managerApp.updateTask(task);
+
+            httpExchange.sendResponseHeaders(200, 0);
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void updateEpic(String inputBody, HttpExchange httpExchange) throws IOException {
+        try {
+            Epic epic = gson.fromJson(inputBody, Epic.class);
+            managerApp.updateEpic(epic);
+
+            httpExchange.sendResponseHeaders(200, 0);
+        } finally {
+            httpExchange.close();
+        }
+    }
+
+    private void updateSubtask(String inputBody, HttpExchange httpExchange) throws IOException {
+        try {
+            Subtask subtask = gson.fromJson(inputBody, Subtask.class);
+            managerApp.updateSubtask(subtask);
+
+            httpExchange.sendResponseHeaders(200, 0);
         } finally {
             httpExchange.close();
         }

@@ -7,105 +7,133 @@ import model.Epic;
 import model.Subtask;
 import model.Task;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HttpTaskManager extends FileBackedTasksManager {
     private final KVTaskClient kvTaskClient;
     private final Gson gson;
 
-    /**
-     * Как избавиться от конструктора super?
-     * Пустой конструктор не получится, так как FileManager требует создания File с аргументом
-     * пути к файлу. Не лучше наследоваться от InMemory? Или вообще от abstract TaskManager,
-     * на крайний случай вынести туда метод save и тут переопределить, но тогда
-     * я получу чистую площадку для деятельности, а не займусь сексом с файлами))
-     */
     public HttpTaskManager(String urlToServer) {
-        super("src/main/resources/tasks.csv"); //залипуха...
         this.kvTaskClient = new KVTaskClient(urlToServer);
         gson = Managers.getGson();
     }
 
-    /**
-     *
-     * Если убрать вызов super.addNewTask(); то мне проще наследоваться от ManagerApp
-     * и реализовать отдельную логику генерации id.
-     * И, правильно добавлять 1 ключ - 1 значение? Получается, что один клиент API_TOKEN будет
-     * хранить много ключей и у каждого по значению, или мне нужно на один ключ запихнуть вееееесь
-     * список задач?
-     */
+    @Override
+    protected void save() {
+        putTaskToServer();
+        putEpicToServer();
+        putSubtaskToServer();
+    }
+
+    private void putTaskToServer() {
+        super.getTasks().forEach(
+                task -> kvTaskClient.put(
+                        String.valueOf(task.getId()),
+                        gson.toJson(task)));
+    }
+
+    private void putEpicToServer() {
+        super.getEpics().forEach(
+                task -> kvTaskClient.put(
+                        String.valueOf(task.getId()),
+                        gson.toJson(task)));
+    }
+
+    private void putSubtaskToServer() {
+        super.getSubtasks().forEach(
+                task -> kvTaskClient.put(
+                        String.valueOf(task.getId()),
+                        gson.toJson(task)));
+    }
+
     @Override
     public int addNewTask(Task task) {
-        String json = gson.toJson(task);
-        int id = super.addNewTask(task);
-        kvTaskClient.put(String.valueOf(id), json);
-        return id;
+        return super.addNewTask(task);
     }
 
     @Override
     public int addNewEpic(Epic epic) {
-        String json = gson.toJson(epic);
-        int id = super.addNewEpic(epic);
-        kvTaskClient.put(String.valueOf(id), json);
-        return id;
+        return super.addNewEpic(epic);
     }
 
     @Override
     public int addNewSubtask(Subtask subtask) {
-        String json = gson.toJson(subtask);
-        int id = super.addNewSubtask(subtask);
-        kvTaskClient.put(String.valueOf(id), json);
-        return id;
+        return super.addNewSubtask(subtask);
     }
 
     @Override
     public Task getTaskById(int id) {
         String json = kvTaskClient.load(String.valueOf(id));
-        return gson.fromJson(json, Task.class);
+        Task task = gson.fromJson(json, Task.class);
+        historyManager.add(task);
+        return task;
     }
 
     @Override
     public Epic getEpicById(int id) {
         String json = kvTaskClient.load(String.valueOf(id));
-        return gson.fromJson(json, Epic.class);
+        Epic epic = gson.fromJson(json, Epic.class);
+        historyManager.add(epic);
+        return epic;
     }
 
     @Override
     public Subtask getSubtaskById(int id) {
         String json = kvTaskClient.load(String.valueOf(id));
-        return gson.fromJson(json, Subtask.class);
+        Subtask subtask = gson.fromJson(json, Subtask.class);
+        historyManager.add(subtask);
+        return subtask;
+    }
+
+    @Override
+    public List<Task> getTasks() {
+        List<Task> list = new ArrayList<>();
+        super.getTasks().forEach(task -> {
+            String json = kvTaskClient.load(String.valueOf(task.getId()));
+            Task taskJson = gson.fromJson(json, Task.class);
+            list.add(taskJson);
+        });
+        return list;
+    }
+
+    @Override
+    public List<Epic> getEpics() {
+        List<Epic> list = new ArrayList<>();
+        super.getEpics().forEach(epic -> {
+            String json = kvTaskClient.load(String.valueOf(epic.getId()));
+            Epic taskJson = gson.fromJson(json, Epic.class);
+            list.add(taskJson);
+        });
+        return list;
+    }
+
+    @Override
+    public List<Subtask> getSubtasks() {
+        List<Subtask> list = new ArrayList<>();
+        super.getSubtasks().forEach(task -> {
+            String json = kvTaskClient.load(String.valueOf(task.getId()));
+            Subtask taskJson = gson.fromJson(json, Subtask.class);
+            list.add(taskJson);
+        });
+        return list;
     }
 
     @Override
     public int updateTask(Task task) {
-        String json = gson.toJson(task);
-        int id = super.updateTask(task);
-        kvTaskClient.put(String.valueOf(id), json);
-        return id;
+        return super.updateTask(task);
     }
 
     @Override
     public int updateEpic(Epic epic) {
-        String json = gson.toJson(epic);
-        int id = super.updateEpic(epic);
-        kvTaskClient.put(String.valueOf(id), json);
-        return id;
+        return super.updateTask(epic);
     }
 
     @Override
     public int updateSubtask(Subtask subtask) {
-        String json = gson.toJson(subtask);
-        int id = super.updateSubtask(subtask);
-        kvTaskClient.put(String.valueOf(id), json);
-        return id;
+        return super.updateTask(subtask);
     }
 
-    /**
-     * Что вообще делать с удалением? Метод save должен постоянно дергать все данные и перезаписывать?
-     * То есть я буду хранить список задач в менеджере, в списке, удалять их из этого списка, например, или мапы,
-     * а метод save просто парсить после каждого действия мапу на сервер?
-     * А при наследовании FileBackedTaskManager они будут храниться в файле...какой-то фарш))
-     * И я так понимаю, что я не могу дописать метод удаления на сервер, там должны быть только три метода:
-     * register, load, save.
-     */
     @Override
     public void removeTasks() {
         super.removeTasks();

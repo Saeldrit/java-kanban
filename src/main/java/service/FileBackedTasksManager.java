@@ -12,7 +12,6 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
@@ -20,6 +19,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             "id,type,name,status,description,duration,startTime,epic";
     private final File file;
     private final ReaderAndWriterHandler handler;
+
+    public FileBackedTasksManager() {
+        this.file = new File("");
+        this.handler = Managers.getHandler();
+    }
 
     public FileBackedTasksManager(String filePath) {
         this.file = new File(filePath);
@@ -52,14 +56,6 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void fillInSubtasks(List<String> contentForWriteInTheFile) {
         getSubtasks().forEach(sub -> contentForWriteInTheFile.add(taskToString(sub)));
-    }
-
-    private String historyToLine() {
-        return "\n"
-                + historyManager.getHistory()
-                .stream()
-                .map(task -> String.valueOf(task.getId()))
-                .collect(Collectors.joining(","));
     }
 
     @Override

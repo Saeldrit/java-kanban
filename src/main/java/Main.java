@@ -8,6 +8,6 @@ public class Main {
     public static void main(String[] args) throws IOException {
         ManagerApp httpTaskManager = new HttpTaskManager("http://localhost:8078/");
         HttpTaskServer httpTaskServer = new HttpTaskServer(httpTaskManager);
-        httpTaskServer.startServer();
+        httpTaskServer.startHttpServer();
     }
 }
