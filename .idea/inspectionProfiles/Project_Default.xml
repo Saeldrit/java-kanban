@@ -7,6 +7,7 @@
           <option value="junit:junit" />
           <option value="org.projectlombok:lombok" />
           <option value="com.google.code.gson:gson" />
+          <option value="org.mockito:mockito-junit-jupiter" />
         </list>
       </option>
     </inspection_tool>

@@ -39,10 +39,6 @@ public class HttpTaskServer {
         server.start();
     }
 
-    /**
-     * Какая практика обработки исключений в данном случае будет лучше?
-     * Чтобы не прокидывать их выше.
-     */
     private void methodAllocator(HttpExchange httpExchange) throws IOException {
         try {
             switch (httpExchange.getRequestMethod()) {
